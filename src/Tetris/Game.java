@@ -1,7 +1,5 @@
 package Tetris;
 
-import Tetris.Blocks.Block;
-
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -39,7 +37,7 @@ public class Game extends JPanel implements ActionListener {
 		updateGameLevel();
 		
 		holdBlock = null;
-		activeBlock = Block.getRandom();
+		activeBlock = new Block();
 		blocksInQueue = new ArrayDeque<Block>(4);
 		
 	}
@@ -76,7 +74,7 @@ public class Game extends JPanel implements ActionListener {
 		game.holdUsed = false;
 		
 		game.activeBlock = game.blocksInQueue.remove();
-		game.blocksInQueue.add(Block.getRandom());
+		game.blocksInQueue.add(new Block());
 		
 		game.redraw();
 		
@@ -86,8 +84,8 @@ public class Game extends JPanel implements ActionListener {
 	// Called when a block "sinks into place"
 	public static void sink() {
 		updateGameLevel();
-		
-		if (false) { // Check if the grid has overflow
+		// TODO: replace false with method call fo overflow check
+		if (false) {
 			game.fallTimer.stop();
 			JOptionPane.showMessageDialog(MainFrame.getThis(),
 				"Congratulations!\n" +

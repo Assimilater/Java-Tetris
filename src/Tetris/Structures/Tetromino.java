@@ -1,15 +1,22 @@
-package Tetris;
+package Tetris.Structures;
 
 import java.awt.*;
 import java.util.HashMap;
 
 public class Tetromino {
-	public static int NUM_SHAPES = 7;
+	// TODO: Replace colors with nicer images :)
+	public static final Color
+		SHADOW = Color.GRAY,
+		EMPTY = Color.BLACK;
+	
+	public static final int
+		NUM_SHAPES = 7,
+		INFINITE_Y = 100; // A high value so there is no way for an empty column in a tetromino to interfere with the block's fall
 	
 	public enum tetroNames { ZBlock, SBlock, LineBlock, TBlock, SquareBlock, LBlock, MirroredLBlock }
 	
 	// Primitive data about each shape by order of tetroNames
-	private final Point[][] teroCoords = new Point[][]{
+	private final Point[][] tetroCoords = new Point[][]{
 		{new Point( 0, -1), new Point(0,  0), new Point(-1, 0), new Point(-1, 1)},
 		{new Point( 0, -1), new Point(0,  0), new Point( 1, 0), new Point( 1, 1)},
 		{new Point( 0, -1), new Point(0,  0), new Point( 0, 1), new Point( 0, 2)},
@@ -26,7 +33,7 @@ public class Tetromino {
 		Color.YELLOW,
 		Color.ORANGE,
 		Color.BLUE
-	};
+	}; // TODO: Replace colors with nicer images :)
 	
 	// Static list of all shape instances
 	private static Tetromino[] shapes = new Tetromino[] {
@@ -40,8 +47,6 @@ public class Tetromino {
 	};
 	
 	public class Configuration {
-		// High value so there is no way for an empty column in an object to interfere with its fall
-		private static final int INFINITE_Y = 100;
 		
 		private Point[] coords;
 		private int minX, maxX;
@@ -68,7 +73,7 @@ public class Tetromino {
 			for (int i = minX; i <= maxX; ++i) {
 				minY.put(i, INFINITE_Y); // There's no telling which coords are in a given column, so set a high value at first
 				for (Point p : coords) {
-					if (p.x == i && p.y < (int) minY.get(i)) {
+					if (p.x == i && p.y < minY.get(i)) {
 						minY.put(i, p.y);
 					}
 				}
@@ -87,6 +92,9 @@ public class Tetromino {
 			}
 			return INFINITE_Y;
 		}
+		
+		// The Block class still needs to have access to the raw data when it "draws" to the board
+		public Point[] getCoords() { return coords; }
 	}
 	
 	// Even the constructor is private because this class maintains a static list of all shape instances
@@ -98,7 +106,7 @@ public class Tetromino {
 		color = tetroColors[index.ordinal()];
 		
 		Point[]
-			defaultCoords = teroCoords[index.ordinal()],
+			defaultCoords = tetroCoords[index.ordinal()],
 			rotatedCooords = new Point[4];
 		
 		// Calculate rotated coordinates

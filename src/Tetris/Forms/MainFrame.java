@@ -1,4 +1,7 @@
-package Tetris;
+package Tetris.Forms;
+
+import Tetris.Game;
+import Tetris.Program;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,7 +13,8 @@ public class MainFrame extends JFrame implements ActionListener, KeyListener, Wi
 	private Container pane;
 	private JPanel contentPanel;
 	
-	private JMenuBar menu; JMenu gameMenu, helpMenu;
+	private JMenuBar menu;
+	private JMenu gameMenu, helpMenu;
 	private JMenuItem NewGameMenuItem, OptionsMenuItem, ExitMenuItem, HowtoMenuItem, AboutMenuItem;
 	
 	// This exists because there will only be a single instance that can be tracked statically
@@ -57,13 +61,15 @@ public class MainFrame extends JFrame implements ActionListener, KeyListener, Wi
 		AboutMenuItem.setMnemonic(KeyEvent.VK_A);
 		
 		gameMenu = new JMenu("Game");
+		gameMenu.setFont(Program.displayFont);
 		gameMenu.add(NewGameMenuItem);
-		gameMenu.add(OptionsMenuItem);
+		//gameMenu.add(OptionsMenuItem);
 		gameMenu.add(ExitMenuItem);
 		
 		helpMenu = new JMenu("Help");
-		gameMenu.add(HowtoMenuItem);
-		gameMenu.add(AboutMenuItem);
+		helpMenu.setFont(Program.displayFont);
+		//helpMenu.add(HowtoMenuItem);
+		helpMenu.add(AboutMenuItem);
 		
 		menu = new JMenuBar();
 		menu.add(gameMenu);
@@ -109,7 +115,7 @@ public class MainFrame extends JFrame implements ActionListener, KeyListener, Wi
 		}
 		else if (e.getSource() == AboutMenuItem) {
 			JOptionPane.showMessageDialog(this,
-				"Tetris\n\n" +
+				"About Tetris:\n" +
 				"Student Name:  John Call\n" +
 				"Student A#:        A01283897\n" +
 				"CS2410 ~ USU",

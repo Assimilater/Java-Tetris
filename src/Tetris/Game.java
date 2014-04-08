@@ -1,12 +1,15 @@
 package Tetris;
 
+import Tetris.Forms.MainFrame;
+import Tetris.Structures.Block;
+import Tetris.Structures.Grid;
+
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayDeque;
 
 public class Game extends JPanel implements ActionListener {
-	private static final int FALL_RATE = 500;
+	private static final int FALL_RATE = 1000, QUEUE_SIZE = 4;
 	
 	// boolean flag "isAccelerated" in case the time updates from leveling while the user is holding down
 	// boolean flag "holdUsed" in case the user tries to stall by switching between hold back and forth
@@ -15,9 +18,12 @@ public class Game extends JPanel implements ActionListener {
 	// int flag "counter" to be used by gameTimer and show the user a countdown
 	private int level, linesToLevel;
 	
-	private Block holdBlock, activeBlock;
-	private ArrayDeque<Block> blocksInQueue;
+	private Block holdBlock, gameBlock;
+	private Block[] inQueueBlock;
 	private Timer fallTimer;
+	
+	private Grid gameGrid, holdGrid;
+	private Grid[] inQueueGrid;
 	
 	// This exists because there will only be a single instance that can be tracked statically
 	private static Game game;
@@ -27,7 +33,7 @@ public class Game extends JPanel implements ActionListener {
 		game = this;
 		MainFrame.setGamePanel(this);
 		
-		fallTimer = new Timer(1000, this);
+		fallTimer = new Timer(FALL_RATE, this);
 		
 		holdUsed = false;
 		isAccelerated = false;
@@ -36,14 +42,19 @@ public class Game extends JPanel implements ActionListener {
 		linesToLevel = 0;
 		updateGameLevel();
 		
+		holdGrid = new Grid(true);
 		holdBlock = null;
-		activeBlock = new Block();
-		blocksInQueue = new ArrayDeque<Block>(4);
 		
-	}
-	
-	private void redraw() {
+		gameGrid = new Grid(false);
+		gameBlock = new Block(gameGrid);
 		
+		inQueueGrid = new Grid[QUEUE_SIZE];
+		inQueueBlock = new Block[QUEUE_SIZE];
+		
+		for (int i = 0; i < QUEUE_SIZE; ++i) {
+			inQueueGrid[i] = new Grid(true);
+			inQueueBlock[i] = new Block((inQueueGrid[i]));
+		}
 	}
 	
 	// Update the fallTimer's delay in milliseconds
@@ -56,37 +67,47 @@ public class Game extends JPanel implements ActionListener {
 			--factor;
 		}
 		
-		game.fallTimer.setDelay((int)(1000 * Math.pow(.5, factor)));
+		game.fallTimer.setDelay((int)(FALL_RATE * Math.pow(.5, factor)));
 	}
 	
 	// updateGameLevel - Determine if the number of lines to level up has been reached, if so update the game
 	private static void updateGameLevel() {
 		if (game.linesToLevel <= 0) {
 			++game.level;
-			game.linesToLevel = game.level * 5 + 15;
+			game.linesToLevel += game.level * 5 + 15;
 			
 			updateFallRate();
 		}
 	}
 	
-	public static void getNext() {
-		game.fallTimer.stop();
+	private static void getNext() {
 		game.holdUsed = false;
 		
-		game.activeBlock = game.blocksInQueue.remove();
-		game.blocksInQueue.add(new Block());
+		// Dequeue the head element
+		game.gameBlock = game.inQueueBlock[0];
+		game.gameBlock.insert(game.gameGrid);
 		
-		game.redraw();
+		// Shuffle the queue forward
+		// There's only four elements in this queue so it's not a noticeable performance hit
+		// The benefit to this is it keeps the indices for each block lined up with the panels they're drawn in
+		for (int i = 1; i < QUEUE_SIZE - 1; ++i) {
+			game.inQueueBlock[i - 1] = game.inQueueBlock[i];
+			game.inQueueBlock[i - 1].insert(game.inQueueGrid[i - 1]);
+		}
 		
-		game.fallTimer.start();
+		// Insert a new block at the tail of the queue
+		game.inQueueBlock[QUEUE_SIZE - 1] = new Block(game.inQueueGrid[QUEUE_SIZE - 1]);
 	}
 	
 	// Called when a block "sinks into place"
-	public static void sink() {
+	public static void sink(int row) {
+		game.fallTimer.stop();
+		
+		game.linesToLevel -= game.gameGrid.collapseAbove(row);
 		updateGameLevel();
+		
 		// TODO: replace false with method call fo overflow check
 		if (false) {
-			game.fallTimer.stop();
 			JOptionPane.showMessageDialog(MainFrame.getThis(),
 				"Congratulations!\n" +
 				"You made it to:\n" +
@@ -95,8 +116,13 @@ public class Game extends JPanel implements ActionListener {
 				JOptionPane.INFORMATION_MESSAGE
 			);
 			
-			// Stop the game
+			// Stop the game simply by setting it to null
 			game = null;
+		}
+		else {
+			getNext();
+			
+			game.fallTimer.start();
 		}
 	}
 	
@@ -109,12 +135,18 @@ public class Game extends JPanel implements ActionListener {
 		game.fallTimer.stop();
 		
 		if (game.holdBlock != null) {
-			Block temp = game.activeBlock;
-			game.activeBlock = game.holdBlock;
+			Block temp = game.gameBlock;
+			
+			game.gameBlock = game.holdBlock;
 			game.holdBlock = temp;
+			
+			game.gameBlock.insert(game.gameGrid);
+			game.holdBlock.insert(game.holdGrid);
 		}
 		else {
-			game.holdBlock = game.activeBlock;
+			game.holdBlock = game.gameBlock;
+			game.holdBlock.insert(game.holdGrid);
+			
 			getNext();
 		}
 		
@@ -123,19 +155,19 @@ public class Game extends JPanel implements ActionListener {
 	}
 	
 	// Let block objects handle the manipulative commands
-	public static void drop() { game.activeBlock.drop(); }
-	public static void rotate() { game.activeBlock.rotate(); }
-	public static void shiftRight() { game.activeBlock.shiftRight(); }
-	public static void shiftLeft() { game.activeBlock.shiftLeft(); }
+	public static void drop() { game.gameBlock.drop(); }
+	public static void rotate() { game.gameBlock.rotate(); }
+	public static void shiftRight() { game.gameBlock.shiftRight(); }
+	public static void shiftLeft() { game.gameBlock.shiftLeft(); }
 	
 	// Adjust the fallTimer when the user hold the down arrow 
 	public static void accelerate() { game.isAccelerated = true; updateFallRate(); }
 	public static void decelerate() { game.isAccelerated = false; updateFallRate(); }
 	
 	// ActionListener
-	public void actionPerformed(ActionEvent e) {
+	public synchronized void actionPerformed(ActionEvent e) {
 		if (e.getSource() == fallTimer) {
-			game.activeBlock.fall();
+			game.gameBlock.fall();
 		}
 	}
 }

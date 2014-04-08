@@ -1,4 +1,7 @@
-package Tetris;
+package Tetris.Forms;
+
+import Tetris.Game;
+import Tetris.Program;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,7 +14,7 @@ public class Options extends JDialog implements ActionListener {
 	private static final String TITLE = "Tetris Options";
 	private Container pane;
 	
-	JButton Ok, Cancel;
+	private JButton Ok, Cancel;
 	
 	public Options() {
 		pane = this.getContentPane();

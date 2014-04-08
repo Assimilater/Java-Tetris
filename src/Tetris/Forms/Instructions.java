@@ -1,4 +1,6 @@
-package Tetris;
+package Tetris.Forms;
+
+import Tetris.Program;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,7 +13,7 @@ public class Instructions extends JDialog implements ActionListener {
 	private static final String TITLE = "Tetris - How to Play";
 	private Container pane;
 	
-	JButton finished, next, previous;
+	private JButton finished, next, previous;
 	
 	public Instructions() {
 		pane = this.getContentPane();

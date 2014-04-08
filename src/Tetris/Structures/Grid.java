@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 
 public class Grid extends JPanel {
+	
 	public enum GridState { EMPTY, SHADOW, BLOCK }
 	
 	public class GridCell extends JPanel {
@@ -36,11 +37,11 @@ public class Grid extends JPanel {
 	public Grid(boolean isPlaceholder) {
 		if (isPlaceholder) {
 			visibleRows = 4; rows = 4; cols = 4;
-			insertion = new Point(1, 1);
+			insertion = new Point(-1, -1);
 		}
 		else {
 			visibleRows = 20; rows = 24; cols = 10;
-			insertion = new Point(5, 20);
+			insertion = new Point(5, 19);
 		}
 		
 		this.setLayout(new GridLayout(visibleRows, cols));
@@ -53,7 +54,7 @@ public class Grid extends JPanel {
 		}
 		
 		// Second for loop because GridLayout inserts left to right top to bottom, and we want left to right bottom to top
-		for (int i = 0; i < visibleRows; ++i) {
+		for (int i = rows - visibleRows; i < rows; ++i) {
 			for (int j = 0; j < cols; ++j) {
 				this.add(gridCells[rows - 1 - i][j]);
 			}
@@ -63,8 +64,12 @@ public class Grid extends JPanel {
 	// Accessors
 	public Point insertAt() { return insertion; }
 	public int getCols() { return cols; }
+	public int getRows() { return rows; }
 	public GridCell cell(int row, int col) {
 		if (row < rows && col < cols) {
+			if (row < 0 || col < 0) {
+				return null;
+			}
 			return gridCells[row][col];
 		}
 		return null;

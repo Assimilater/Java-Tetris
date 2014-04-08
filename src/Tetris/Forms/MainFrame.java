@@ -8,7 +8,7 @@ import java.awt.*;
 import java.awt.event.*;
 
 public class MainFrame extends JFrame implements ActionListener, KeyListener, WindowListener {
-	private static final int WIDTH = 1250, HEIGHT = 750, MIN_WIDTH = 500, MIN_HEIGHT = 450;
+	private static final int WIDTH = 1250, HEIGHT = 750;
 	private static final String TITLE = "Tetris!";
 	private Container pane;
 	private JPanel contentPanel;
@@ -26,7 +26,7 @@ public class MainFrame extends JFrame implements ActionListener, KeyListener, Wi
 		
 		this.setTitle(TITLE);
 		this.setSize(WIDTH, HEIGHT);
-		this.setMinimumSize(new Dimension(MIN_WIDTH, MIN_HEIGHT));
+		this.setResizable(false);
 		this.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		this.setLocationRelativeTo(null);
 		this.addWindowListener(this);
@@ -34,6 +34,7 @@ public class MainFrame extends JFrame implements ActionListener, KeyListener, Wi
 		
 		pane = this.getContentPane();
 		contentPanel = new JPanel();
+		contentPanel.setLayout(new BorderLayout());
 		
 		NewGameMenuItem = new JMenuItem("New Game");
 		NewGameMenuItem.addActionListener(this);
@@ -84,7 +85,9 @@ public class MainFrame extends JFrame implements ActionListener, KeyListener, Wi
 	public static void setGamePanel(Game panel) {
 		instance.contentPanel.removeAll();
 		if (panel != null) {
-			instance.contentPanel.add(panel);
+			instance.contentPanel.add(panel, BorderLayout.CENTER);
+			instance.repaint();
+			instance.revalidate();
 		}
 	}
 	
@@ -92,7 +95,11 @@ public class MainFrame extends JFrame implements ActionListener, KeyListener, Wi
 	private static boolean confirmQuit(String title) {
 		return
 			!Game.isActive() ||
-			JOptionPane.NO_OPTION != JOptionPane.showConfirmDialog(instance, "Quit the Current Game?", "Confirm " + title, JOptionPane.YES_NO_OPTION);
+			JOptionPane.NO_OPTION != JOptionPane.showConfirmDialog(instance,
+				"Quit the Current Game?",
+				"Confirm " + title,
+				JOptionPane.YES_NO_OPTION
+			);
 	}
 
 	public void actionPerformed(ActionEvent e) {

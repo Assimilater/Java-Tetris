@@ -11,15 +11,16 @@ public class Block {
 	private Tetromino block;
 	private Grid pane;
 	private Point location;
-	private boolean rotated;
+	private Configuration configuration;
 	private int minY;
 	public Block(Grid g) {
 		block = Tetromino.getTetromino(generator.nextInt(Tetromino.NUM_SHAPES));
+		location = new Point();
 		insert(g);
 	}
 	
 	// The value of minY needs to be accessed enough it's justified to update a member with this method call
-	private void calcMinY() { minY = block.getConfiguration(rotated).getMinY(location.x); }
+	private void calcMinY() { if (pane != null) minY = configuration.getMinY(pane, location.x); }
 	
 	// In a Tetromino the lowest y-coordinate is -1, so we can be sure minY - 1 will cover all possible collapsible rows
 	private void sink() { Game.sink(minY - 1); }
@@ -27,27 +28,38 @@ public class Block {
 	public void insert(Grid g) {
 		free();
 		pane = g;
-		location = g.insertAt();
-		rotated = false;
+		configuration = block.getConfiguration();
+		
+		location.setLocation(g.insertAt());
+		if (location.x == -1) {
+			location.setLocation(-configuration.getMinX(), configuration.getMinY(g, -configuration.getMinX()));
+		}
+		
 		calcMinY();
+		draw();
+	}
+	
+	private void free() {
+		if (pane != null) {
+			Point[] coords = configuration.getCoords();
+			for (Point p : coords) {
+				pane.cell(location.y + p.y, location.x + p.x).Clear();
+				pane.cell(minY + p.y, location.x + p.x).Clear();
+			}
+		}
 	}
 	
 	private void draw() {
 		if (pane != null) {
 			// This requires two separate loops because a falling block may overlay its shadow partially before it is fully in place
-			for (Point p : block.getConfiguration(rotated).getCoords()) {
-				pane.cell(minY - p.y, location.x - p.x).Shadow();
+			Point[] coords = configuration.getCoords();
+			if (pane.insertAt().x != -1) {
+				for (Point p : coords) {
+					pane.cell(minY + p.y, location.x + p.x).Shadow();
+				}
 			}
-			for (Point p : block.getConfiguration(rotated).getCoords()) {
-				pane.cell(location.y - p.y, location.x - p.x).Block(block);
-			}
-		}
-	}
-	private void free() {
-		if (pane != null) {
-			for (Point p : block.getConfiguration(rotated).getCoords()) {
-				pane.cell(location.y - p.y, location.x - p.x).Clear();
-				pane.cell(minY - p.y, location.x - p.x).Clear();
+			for (Point p : coords) {
+				pane.cell(location.y + p.y, location.x + p.x).Block(block);
 			}
 		}
 	}
@@ -74,9 +86,24 @@ public class Block {
 		boolean legal = true;
 		
 		// Make sure that by rotating we don't rotate into another block
-		for (Point p : block.getConfiguration(!rotated).getCoords()) {
-			if (p.y + location.y > 0 && p.x + location.x >= 0 && p.x + location.x < pane.getCols()) {
-				if (pane.cell(p.y + location.y, p.x + location.x).getState() == Grid.GridState.BLOCK) {
+		Configuration test = new Configuration(configuration);
+		
+		Point validate = new Point();
+		Point[] coords = configuration.getCoords();
+		boolean isOverlap;
+		for (Point p : coords) {
+			validate.setLocation(p.x + location.x, p.y + location.y);
+			
+			isOverlap = false;
+			for (Point p2 : coords) {
+				if (p2.x + location.x == validate.x && p2.y + location.y == validate.y) {
+					isOverlap = true;
+					break;
+				}
+			}
+			
+			if (!isOverlap && validate.y > 0 && validate.x >= 0 && p.x + validate.x < pane.getCols()) {
+				if (pane.cell(validate.y, validate.x).getState() == Grid.GridState.BLOCK) {
 					legal = false;
 					break;
 				}
@@ -86,14 +113,14 @@ public class Block {
 		if (legal) {
 			free();
 			
-			rotated = !rotated;
+			configuration.rotate();
 			calcMinY();
 			
 			// Check if by rotating we've gone out of bounds, and make corrections
-			while (location.x + block.getConfiguration(rotated).getMinX() < 0) {
+			while (location.x + configuration.getMinX() < 0) {
 				location.translate(1, 0);
 			}
-			while (location.x + block.getConfiguration(rotated).getMaxX() > pane.getCols()) {
+			while (location.x + configuration.getMaxX() > pane.getCols()) {
 				location.translate(-1, 0);
 			}
 			
@@ -102,7 +129,7 @@ public class Block {
 	}
 	
 	public void shiftRight() {
-		if (location.x + block.getConfiguration(rotated).getMaxX() < pane.getCols()) {
+		if (location.x + configuration.getMaxX() < pane.getCols()) {
 			free();
 			
 			location.translate(1, 0);
@@ -111,7 +138,7 @@ public class Block {
 		}
 	}
 	public void shiftLeft() {
-		if (location.x + block.getConfiguration(rotated).getMinX() >= 0) {
+		if (location.x + configuration.getMinX() >= 0) {
 			free();
 			
 			location.translate(-1, 0);

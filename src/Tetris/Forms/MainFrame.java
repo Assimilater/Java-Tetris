@@ -10,11 +10,8 @@ import java.awt.event.*;
 public class MainFrame extends JFrame implements ActionListener, KeyListener, WindowListener {
 	private static final int WIDTH = 625, HEIGHT = 715;
 	private static final String TITLE = "Tetris!";
-	private Container pane;
-	private JPanel contentPanel;
 	
-	private JMenuBar menu;
-	private JMenu gameMenu, helpMenu;
+	private JPanel contentPanel;
 	private JMenuItem NewGameMenuItem, OptionsMenuItem, ExitMenuItem, HowtoMenuItem, AboutMenuItem;
 	
 	// This exists because there will only be a single instance that can be tracked statically
@@ -32,7 +29,6 @@ public class MainFrame extends JFrame implements ActionListener, KeyListener, Wi
 		this.addWindowListener(this);
 		this.addKeyListener(this);
 		
-		pane = this.getContentPane();
 		contentPanel = new JPanel();
 		contentPanel.setLayout(new BorderLayout());
 		
@@ -50,7 +46,7 @@ public class MainFrame extends JFrame implements ActionListener, KeyListener, Wi
 		ExitMenuItem.addActionListener(this);
 		ExitMenuItem.setFont(Program.displayFont);
 		ExitMenuItem.setMnemonic(KeyEvent.VK_X);
-
+		
 		HowtoMenuItem = new JMenuItem("How to Play");
 		HowtoMenuItem.addActionListener(this);
 		HowtoMenuItem.setFont(Program.displayFont);
@@ -61,23 +57,26 @@ public class MainFrame extends JFrame implements ActionListener, KeyListener, Wi
 		AboutMenuItem.setFont(Program.displayFont);
 		AboutMenuItem.setMnemonic(KeyEvent.VK_A);
 		
+		JMenu
 		gameMenu = new JMenu("Game");
 		gameMenu.setFont(Program.displayFont);
 		gameMenu.add(NewGameMenuItem);
 		//gameMenu.add(OptionsMenuItem);
 		gameMenu.add(ExitMenuItem);
 		
+		JMenu
 		helpMenu = new JMenu("Help");
 		helpMenu.setFont(Program.displayFont);
 		//helpMenu.add(HowtoMenuItem);
 		helpMenu.add(AboutMenuItem);
 		
+		JMenuBar
 		menu = new JMenuBar();
 		menu.add(gameMenu);
 		menu.add(helpMenu);
 		
-		pane.add(menu, BorderLayout.NORTH);
-		pane.add(contentPanel, BorderLayout.CENTER);
+		this.getContentPane().add(menu, BorderLayout.NORTH);
+		this.getContentPane().add(contentPanel, BorderLayout.CENTER);
 		
 		this.setVisible(true);
 	}

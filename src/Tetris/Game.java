@@ -6,7 +6,6 @@ import Tetris.Structures.Grid;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -26,7 +25,7 @@ public class Game extends JPanel implements ActionListener {
 	private Grid[] inQueueGrid;
 	
 	private Integer level, linesToLevel;
-	private JLabel levelLabel, levelCountLabel, linesLabel, linesCountLabel;
+	private JLabel levelCountLabel, linesCountLabel;
 	
 	// This exists because there will only be a single instance that can be tracked statically
 	private static Game game;
@@ -39,6 +38,7 @@ public class Game extends JPanel implements ActionListener {
 		fallTimer = new Timer(FALL_RATE, this);
 		holdUsed = false;
 		
+		JLabel
 		levelLabel = new JLabel("Level: ");
 		levelLabel.setFont(Program.displayFont);
 		levelLabel.setBounds(5, 150, 150, 20);
@@ -50,6 +50,7 @@ public class Game extends JPanel implements ActionListener {
 		levelCountLabel.setBounds(5, 175, 150, 50);
 		this.add(levelCountLabel);
 		
+		JLabel
 		linesLabel = new JLabel("Lines to Level: ");
 		linesLabel.setFont(Program.displayFont);
 		linesLabel.setBounds(5, 250, 150, 20);

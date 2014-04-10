@@ -11,6 +11,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class Game extends JPanel implements ActionListener {
+	public enum KEY_COMMAND { LEFT, RIGHT, ROTATE, HOLD, FALL, DROP }
+	
 	private static final int FALL_RATE = 1000, QUEUE_SIZE = 4;
 	
 	// boolean flag "holdUsed" in case the user tries to stall by switching between hold back and forth
@@ -152,7 +154,7 @@ public class Game extends JPanel implements ActionListener {
 		}
 	}
 	
-	public static void hold() {
+	private void hold() {
 		if (game.holdUsed) {
 			// Alert the user they can't switch again
 			return;
@@ -181,12 +183,33 @@ public class Game extends JPanel implements ActionListener {
 	}
 	
 	// Let block objects handle the key commands
-	public static void drop() { game.gameBlock.drop(); }
-	public static void rotate() { game.gameBlock.rotate(); }
-	public static void shiftRight() { game.gameBlock.shiftRight(); }
-	public static void shiftLeft() { game.gameBlock.shiftLeft(); }
-	public static void fall() { game.gameBlock.fall(); }
-	
+	public static synchronized void executeKey(KEY_COMMAND k) {
+		switch (k) {
+			case LEFT:
+				game.gameBlock.shiftLeft();
+				break;
+			
+			case RIGHT:
+				game.gameBlock.shiftRight();
+				break;
+			
+			case ROTATE:
+				game.gameBlock.rotate();
+				break;
+			
+			case FALL:
+				game.gameBlock.fall();
+				break;
+			
+			case DROP:
+				game.gameBlock.drop();
+				break;
+			
+			case HOLD:
+				game.hold();
+				break;
+		}
+	}
 	
 	// ActionListener
 	public synchronized void actionPerformed(ActionEvent e) {

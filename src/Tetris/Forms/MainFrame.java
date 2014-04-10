@@ -148,24 +148,33 @@ public class MainFrame extends JFrame implements ActionListener, KeyListener, Wi
 	// KeyListener methods
 	public void keyPressed(KeyEvent e) {
 		if (Game.isActive()) {
-			if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-				Game.drop();
+			Game.KEY_COMMAND k = null;
+			switch (e.getKeyCode()) {
+				case KeyEvent.VK_LEFT:
+					k = Game.KEY_COMMAND.LEFT;
+					break;
+				
+				case KeyEvent.VK_RIGHT:
+					k = Game.KEY_COMMAND.RIGHT;
+					break;
+				
+				case KeyEvent.VK_UP:
+					k = Game.KEY_COMMAND.ROTATE;
+					break;
+				
+				case KeyEvent.VK_DOWN:
+					k = Game.KEY_COMMAND.FALL;
+					break;
+				
+				case KeyEvent.VK_SPACE:
+					k = Game.KEY_COMMAND.DROP;
+					break;
+				
+				case KeyEvent.VK_SHIFT:
+					k = Game.KEY_COMMAND.HOLD;
+					break;
 			}
-			else if (e.getKeyCode() == KeyEvent.VK_SHIFT) {
-				Game.hold();
-			}
-			else if (e.getKeyCode() == KeyEvent.VK_LEFT) {
-				Game.shiftLeft();
-			}
-			else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
-				Game.shiftRight();
-			}
-			else if (e.getKeyCode() == KeyEvent.VK_UP) {
-				Game.rotate();
-			}
-			else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-				Game.fall();
-			}
+			Game.executeKey(k);
 		}
 	}
 	public void keyReleased(KeyEvent e) { }

@@ -9,23 +9,23 @@ public class Grid extends JPanel {
 	
 	public class GridCell extends JPanel {
 		private GridState state;
-		private Tetromino block;
+		private Shape block;
 		
 		public GridState getState() { return state; }
-		public Tetromino getBlock() { return block; }
+		public Shape getBlock() { return block; }
 		
 		public GridCell () { Clear(); }
 		public void Shadow() {
-			this.setBackground(Tetromino.SHADOW);
+			this.setBackground(Shape.SHADOW);
 			state = GridState.SHADOW;
 			block = null;
 		}
 		public void Clear() {
-			this.setBackground(Tetromino.EMPTY);
+			this.setBackground(Shape.EMPTY);
 			state = GridState.EMPTY;
 			block = null;
 		}
-		public void Block(Tetromino b) {
+		public void Block(Shape b) {
 			this.setBackground(b.getColor());
 			state = GridState.BLOCK;
 		} // TODO: Replace colors with nicer images :)

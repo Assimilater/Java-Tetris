@@ -3,17 +3,15 @@ package Tetris.Structures;
 import Tetris.Game;
 
 import java.awt.*;
-import java.util.Random;
 
 public class Block {
-	private static final Random generator = new Random();
 	
 	private Shape block;
 	private Grid pane;
 	private Point location;
 	private int minY;
 	public Block(Grid g) {
-		block = Shape.nextShape(generator.nextInt(Shape.NUM_SHAPES));
+		block = Shape.nextShape();
 		location = new Point();
 		insert(g);
 	}

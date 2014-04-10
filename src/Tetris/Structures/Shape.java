@@ -1,13 +1,17 @@
 package Tetris.Structures;
 
 import java.awt.*;
+import java.util.Random;
 
 public class Shape {
+	private static final Random generator = new Random();
+	private static final int NUM_SHAPES = 7;
+	
 	private int config, state;
 	
 	// Constructor is private because getNext will pick a random state to instantiate
-	private Shape(int tConfig) { config = tConfig; state = 0; }
-	public static Shape nextShape(int i) { return i < NUM_SHAPES && i >= 0 ? new Shape(i) : null; }
+	private Shape(int i) { config = i; state = 0; }
+	public static Shape nextShape() { return new Shape(generator.nextInt(NUM_SHAPES)); }
 	
 	// Manipulators
 	public void rotate() { state = (state == configs[config].rotations) ? state + 1 : 0; }
@@ -47,8 +51,8 @@ public class Shape {
 	// BELOW THIS POINT CONTAINS STRICTLY STATICALLY REFERENCED DATA OBJECTS
 	public static enum Tetromino { SBlock, ZBlock, LineBlock, TBlock, SquareBlock, LBlock, MirroredLBlock }
 	
-	public static final int NUM_SHAPES = 7;
-	public static final Color SHADOW = Color.GRAY, EMPTY = Color.BLACK; // TODO: Replace colors with nicer images :)
+	// TODO: Replace colors with nicer images :)
+	public static final Color SHADOW = Color.GRAY, EMPTY = Color.BLACK;
 	private static final Configuration[] configs = new Configuration[] {
 		new Configuration(
 			Tetromino.SBlock, Color.GREEN, 4,

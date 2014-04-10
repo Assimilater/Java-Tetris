@@ -9,12 +9,13 @@ public class Shape {
 	
 	private int config, state;
 	
-	// Constructor is private because getNext will pick a random state to instantiate
+	// Default Constructor is private because getNext will pick a random state to instantiate
 	private Shape(int i) { config = i; state = 0; }
+	public Shape(Shape rhs) { config = rhs.config; state = rhs.state; }
 	public static Shape nextShape() { return new Shape(generator.nextInt(NUM_SHAPES)); }
 	
 	// Manipulators
-	public void rotate() { state = (state == configs[config].rotations) ? state + 1 : 0; }
+	public void rotate() { state = (state == configs[config].rotations - 1) ? 0 : state + 1; }
 	public void derotate() { state = (state == 0) ? configs[config].rotations - 1 : state - 1; }
 	
 	// Accessors
@@ -55,11 +56,11 @@ public class Shape {
 	public static final Color SHADOW = Color.GRAY, EMPTY = Color.BLACK;
 	private static final Configuration[] configs = new Configuration[] {
 		new Configuration(
-			Tetromino.SBlock, Color.GREEN, 4,
+			Tetromino.SBlock, Color.GREEN, 2,
 			new Point[]{new Point( 0, -1), new Point(0,  0), new Point(-1, 0), new Point(-1, 1)}
 		),
 		new Configuration(
-			Tetromino.ZBlock, Color.PINK, 4,
+			Tetromino.ZBlock, Color.PINK, 2,
 			new Point[]{new Point( 0, -1), new Point(0,  0), new Point( 1, 0), new Point( 1, 1)}
 		),
 		new Configuration(

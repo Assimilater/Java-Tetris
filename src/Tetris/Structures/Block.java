@@ -81,26 +81,26 @@ public class Block {
 	public void rotate() {
 		free();
 		
-		boolean legal = true;
-		
 		// Make sure that by rotating we don't rotate into another block
-		block.rotate();
-		Point[] coords = block.getCoords();
+		Shape testShape = new Shape(block);
+		Point testLoc = new Point(location);
+		boolean legal = true;
+		testShape.rotate();
 		
+		// Check if by rotating we've gone out of bounds, and make corrections
+		while (testLoc.x + testShape.getMinX() < 0) {
+			testLoc.translate(1, 0);
+		}
+		while (testLoc.x - 1 + testShape.getMaxX() >= pane.getCols()) {
+			testLoc.translate(-1, 0);
+		}
+		
+		// Check and make sure we're not rotating into any previously placed blocks
+		Point[] coords = block.getCoords();
 		Point validate = new Point();
-		boolean isOverlap;
 		for (Point p : coords) {
 			validate.setLocation(p.x + location.x, p.y + location.y);
-			isOverlap = false;
-			
-			for (Point p2 : coords) {
-				if (p2.x + location.x == validate.x && p2.y + location.y == validate.y) {
-					isOverlap = true;
-					break;
-				}
-			}
-			
-			if (!isOverlap && validate.y >= 0 && validate.x >= 0 && p.x + validate.x < pane.getCols()) {
+			if (validate.y >= 0 && validate.x >= 0 && p.x + validate.x < pane.getCols()) {
 				if (pane.cell(validate.y, validate.x).getState() == Grid.GridState.BLOCK) {
 					legal = false;
 					break;
@@ -108,38 +108,32 @@ public class Block {
 			}
 		}
 		
-		if (!legal) {
-			block.derotate();
-		}
-		else {
+		if (legal) {
+			block = testShape;
+			location = testLoc;
 			calcMinY();
-			
-			// Check if by rotating we've gone out of bounds, and make corrections
-			while (location.x + 1 + block.getMinX() < 0) {
-				location.translate(1, 0);
-			}
-			while (location.x - 1 + block.getMaxX() >= pane.getCols()) {
-				location.translate(-1, 0);
-			}
 		}
+		
 		draw();
 	}
 	
 	public void shiftRight() {
 		if (location.x + block.getMaxX() < pane.getCols() - 1) {
 			free();
-			
-			location.translate(1, 0);
-			calcMinY();
+			if (pane.cell(location.y, location.x + 1 + block.getMaxX()).getState() != Grid.GridState.BLOCK) {
+				location.translate(1, 0);
+				calcMinY();
+			}
 			draw();
 		}
 	}
 	public void shiftLeft() {
 		if (location.x + block.getMinX() > 0) {
 			free();
-			
-			location.translate(-1, 0);
-			calcMinY();
+			if (pane.cell(location.y, location.x - 1 + block.getMaxX()).getState() != Grid.GridState.BLOCK) {
+				location.translate(-1, 0);
+				calcMinY();
+			}
 			draw();
 		}
 	}

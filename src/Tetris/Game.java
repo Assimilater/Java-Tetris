@@ -72,7 +72,7 @@ public class Game extends JPanel implements ActionListener {
 		holdBlock = null;
 		
 		gameGrid = new Grid(false);
-		gameGrid.setBounds(175, 25, 350, 600);
+		gameGrid.setBounds(200, 25, 330, 600);
 		this.add(gameGrid);
 		
 		gameBlock = new Block(gameGrid);

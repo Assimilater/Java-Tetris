@@ -129,7 +129,7 @@ public class Block {
 	}
 	
 	public void shiftRight() {
-		if (location.x + configuration.getMaxX() < pane.getCols()) {
+		if (location.x + configuration.getMaxX() < pane.getCols() - 1) {
 			free();
 			
 			location.translate(1, 0);
@@ -138,7 +138,7 @@ public class Block {
 		}
 	}
 	public void shiftLeft() {
-		if (location.x + configuration.getMinX() >= 0) {
+		if (location.x + configuration.getMinX() > 0) {
 			free();
 			
 			location.translate(-1, 0);

@@ -3,7 +3,6 @@ package Tetris;
 import Tetris.Forms.MainFrame;
 import Tetris.Structures.Block;
 import Tetris.Structures.Grid;
-import com.sun.prism.paint.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -14,20 +13,18 @@ import java.awt.event.ActionListener;
 public class Game extends JPanel implements ActionListener {
 	private static final int FALL_RATE = 1000, QUEUE_SIZE = 4;
 	
-	// boolean flag "isAccelerated" in case the time updates from leveling while the user is holding down
 	// boolean flag "holdUsed" in case the user tries to stall by switching between hold back and forth
-	private boolean holdUsed, isAccelerated;
-	
-	// int flag "counter" to be used by gameTimer and show the user a countdown
-	private Integer level, linesToLevel;
+	private boolean holdUsed;
+	private Timer fallTimer;
 	
 	private Block holdBlock, gameBlock;
 	private Block[] inQueueBlock;
-	private Timer fallTimer;
 	
 	private Grid gameGrid, holdGrid;
 	private Grid[] inQueueGrid;
-	private JLabel linesLabel, linesCountLabel;
+	
+	private Integer level, linesToLevel;
+	private JLabel levelLabel, levelCountLabel, linesLabel, linesCountLabel;
 	
 	// This exists because there will only be a single instance that can be tracked statically
 	private static Game game;
@@ -38,9 +35,18 @@ public class Game extends JPanel implements ActionListener {
 		this.setLayout(null);
 		
 		fallTimer = new Timer(FALL_RATE, this);
-		
 		holdUsed = false;
-		isAccelerated = false;
+		
+		levelLabel = new JLabel("Level: ");
+		levelLabel.setFont(Program.displayFont);
+		levelLabel.setBounds(5, 150, 150, 20);
+		this.add(levelLabel);
+		
+		levelCountLabel = new JLabel("");
+		levelCountLabel.setFont(new Font(Program.displayFont.getFontName(), Font.BOLD, 30));
+		levelCountLabel.setForeground(Color.BLUE);
+		levelCountLabel.setBounds(5, 175, 150, 50);
+		this.add(levelCountLabel);
 		
 		linesLabel = new JLabel("Lines to Level: ");
 		linesLabel.setFont(Program.displayFont);
@@ -58,13 +64,13 @@ public class Game extends JPanel implements ActionListener {
 		updateGameLevel();
 		
 		holdGrid = new Grid(true);
-		holdGrid.setBounds(300, 5, 50, 50);
+		holdGrid.setBounds(110, 25, 50, 50);
 		this.add(holdGrid);
 		
 		holdBlock = null;
 		
 		gameGrid = new Grid(false);
-		gameGrid.setBounds(375, 0, 350, 600);
+		gameGrid.setBounds(175, 25, 350, 600);
 		this.add(gameGrid);
 		
 		gameBlock = new Block(gameGrid);
@@ -74,7 +80,7 @@ public class Game extends JPanel implements ActionListener {
 		
 		for (int i = 0; i < QUEUE_SIZE; ++i) {
 			inQueueGrid[i] = new Grid(true);
-			inQueueGrid[i].setBounds(900, 5 + 50 * i, 50, 50);
+			inQueueGrid[i].setBounds(550, 25 + 50 * i, 50, 50);
 			this.add(inQueueGrid[i]);
 			
 			inQueueBlock[i] = new Block((inQueueGrid[i]));
@@ -83,31 +89,22 @@ public class Game extends JPanel implements ActionListener {
 		MainFrame.setGamePanel(this);
 	}
 	
-	// Update the fallTimer's delay in milliseconds
-	private void updateFallRate() {
-		// Level 1 fall rate is 1 second, ever level thereafter is half the time
-		// If the user is holding the down key it should double the speed, so don't decrement
-		// At level 1, you don't double the fall speed, so decrement otherwise
-		int factor = level;
-		if (!isAccelerated) {
-			--factor;
-		}
-		
-		fallTimer.setDelay((int)(FALL_RATE * Math.pow(.5, factor)));
-	}
-	
 	// updateGameLevel - Determine if the number of lines to level up has been reached, if so update the game
 	private void updateGameLevel() {
 		if (linesToLevel <= 0) {
 			++level;
 			linesToLevel += level * 5 + 15;
 			
-			updateFallRate();
+			// Update fall rate: Level 1 fall rate is 1 second, ever level thereafter is half the time
+			fallTimer.setDelay((int) (FALL_RATE * Math.pow(.5, level - 1)));
 		}
-		updateLinesLabel();
+		updateLabels();
 	}
 	
-	private void updateLinesLabel() { linesCountLabel.setText(linesToLevel.toString()); }
+	private void updateLabels() {
+		levelCountLabel.setText(level.toString());
+		linesCountLabel.setText(linesToLevel.toString());
+	}
 	
 	private void getNext() {
 		holdUsed = false;
@@ -133,7 +130,7 @@ public class Game extends JPanel implements ActionListener {
 		game.fallTimer.stop();
 		
 		//game.linesToLevel -= game.gameGrid.collapseAbove(row);
-		//game.updateGameLevel();
+		game.updateGameLevel();
 		
 		// TODO: replace false with method call fo overflow check
 		if (false) {
@@ -183,15 +180,13 @@ public class Game extends JPanel implements ActionListener {
 		game.fallTimer.start();
 	}
 	
-	// Let block objects handle the manipulative commands
+	// Let block objects handle the key commands
 	public static void drop() { game.gameBlock.drop(); }
 	public static void rotate() { game.gameBlock.rotate(); }
 	public static void shiftRight() { game.gameBlock.shiftRight(); }
 	public static void shiftLeft() { game.gameBlock.shiftLeft(); }
+	public static void fall() { game.gameBlock.fall(); }
 	
-	// Adjust the fallTimer when the user hold the down arrow 
-	public static void accelerate() { game.isAccelerated = true; game.updateFallRate(); }
-	public static void decelerate() { game.isAccelerated = false; game.updateFallRate(); }
 	
 	// ActionListener
 	public synchronized void actionPerformed(ActionEvent e) {

@@ -8,7 +8,7 @@ import java.awt.*;
 import java.awt.event.*;
 
 public class MainFrame extends JFrame implements ActionListener, KeyListener, WindowListener {
-	private static final int WIDTH = 1250, HEIGHT = 750;
+	private static final int WIDTH = 625, HEIGHT = 715;
 	private static final String TITLE = "Tetris!";
 	private Container pane;
 	private JPanel contentPanel;
@@ -164,16 +164,10 @@ public class MainFrame extends JFrame implements ActionListener, KeyListener, Wi
 				Game.rotate();
 			}
 			else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-				Game.accelerate();
+				Game.fall();
 			}
 		}
 	}
-	public void keyReleased(KeyEvent e) {
-		if (Game.isActive()) {
-			if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-				Game.decelerate();
-			}
-		}
-	}
+	public void keyReleased(KeyEvent e) { }
 	public void keyTyped(KeyEvent e) { }
 }

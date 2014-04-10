@@ -10,7 +10,7 @@ public class Tetromino {
 	
 	public static final int NUM_SHAPES = 7;
 	
-	public enum tetroNames { ZBlock, SBlock, LineBlock, TBlock, SquareBlock, LBlock, MirroredLBlock }
+	public enum tetroNames { SBlock, ZBlock, LineBlock, TBlock, SquareBlock, LBlock, MirroredLBlock }
 	
 	// Primitive data about each shape by order of tetroNames
 	private final Point[][] tetroCoords = new Point[][]{
@@ -23,8 +23,8 @@ public class Tetromino {
 		{new Point( 1, -1), new Point(0, -1), new Point( 0, 0), new Point( 0, 1)}
 	};
 	private final Color[] tetroColors = new Color[] {
-		Color.PINK,
 		Color.GREEN,
+		Color.PINK,
 		Color.CYAN,
 		Color.MAGENTA,
 		Color.YELLOW,
@@ -34,8 +34,8 @@ public class Tetromino {
 	
 	// Static list of all shape instances
 	private static Tetromino[] shapes = new Tetromino[] {
-		new Tetromino(tetroNames.ZBlock),
 		new Tetromino(tetroNames.SBlock),
+		new Tetromino(tetroNames.ZBlock),
 		new Tetromino(tetroNames.LineBlock),
 		new Tetromino(tetroNames.TBlock),
 		new Tetromino(tetroNames.SquareBlock),

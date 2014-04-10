@@ -116,7 +116,7 @@ public class Game extends JPanel implements ActionListener {
 		// Shuffle the queue forward
 		// There's only four elements in this queue so it's not a noticeable performance hit
 		// The benefit to this is it keeps the indices for each block lined up with the panels they're drawn in
-		for (int i = 1; i < QUEUE_SIZE - 1; ++i) {
+		for (int i = 1; i < QUEUE_SIZE; ++i) {
 			inQueueBlock[i - 1] = inQueueBlock[i];
 			inQueueBlock[i - 1].insert(inQueueGrid[i - 1]);
 		}

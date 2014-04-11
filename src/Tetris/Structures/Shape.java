@@ -10,13 +10,9 @@ public class Shape {
 	private int config, state;
 	
 	// Default Constructor is private because getNext will pick a random state to instantiate
-	private Shape(int i) { config = i; state = 0; }
-	public Shape(Shape rhs) { config = rhs.config; state = rhs.state; }
-	public static Shape nextShape() { return new Shape(generator.nextInt(NUM_SHAPES)); }
-	
-	// Manipulators
-	public void rotate() { state = (state == configs[config].rotations - 1) ? 0 : state + 1; }
-	public void derotate() { state = (state == 0) ? configs[config].rotations - 1 : state - 1; }
+	private Shape(int i, int s) { config = i; state = s; }
+	public static Shape nextShape() { return new Shape(generator.nextInt(NUM_SHAPES), 0); }
+	public Shape rotate() { return new Shape(config, (state == configs[config].states.length - 1) ? 0 : state + 1); }
 	
 	// Accessors
 	public Tetromino getName() { return configs[config].name; }
@@ -26,28 +22,8 @@ public class Shape {
 	// Boundary-checking properties
 	public int getMinX() { return configs[config].states[state].minX; }
 	public int getMaxX() { return configs[config].states[state].maxX; }
-	public int getMinY(Grid g, int col) {
-		int minY = 0;
-		for (Point p : configs[config].states[state].coords) {
-			boolean sentinel = true;
-			while (sentinel) {
-				if (g.cell(p.y + minY, col + p.x) == null) {
-					++minY;
-				}
-				else if (g.cell(p.y + minY, col + p.x).getState() == Grid.GridState.BLOCK) {
-					++minY;
-				}
-				else {
-					sentinel = false;
-				}
-				
-				if (minY >= g.getRows()) {
-					sentinel = false; // this will cause a return value out of bounds, indicating it can't go here 
-				}
-			}
-		}
-		return minY;
-	}
+	public int getMinY() { return configs[config].states[state].minY; }
+	public int getMaxY() { return configs[config].states[state].maxY; }
 	
 	// BELOW THIS POINT CONTAINS STRICTLY STATICALLY REFERENCED DATA OBJECTS
 	public static enum Tetromino { SBlock, ZBlock, LineBlock, TBlock, SquareBlock, LBlock, MirroredLBlock }
@@ -88,7 +64,7 @@ public class Shape {
 	private static class Configuration {
 		private static class Rotation {
 			public Point[] coords;
-			public int minX, maxX;
+			public int minX, maxX, minY, maxY;
 			private Rotation(Point[] c, int r) {
 				coords = new Point[4];
 				
@@ -103,37 +79,29 @@ public class Shape {
 					}
 				}
 				
-				// Cache minX and maxX
-				minX = 0;
+				// Cache minX, maxX, minY and maxY
+				minX = 0; maxX = 0; minY = 0; maxY = 0;
 				for (Point p : coords) {
-					if (p.x < minX) {
-						minX = p.x;
-					}
-				}
-				
-				maxX = 0;
-				for (Point p : coords) {
-					if (p.x > maxX) {
-						maxX = p.x;
-					}
+					if (p.x < minX) { minX = p.x; }
+					if (p.x > maxX) { maxX = p.x; }
+					if (p.y < minY) { minY = p.y; }
+					if (p.y > maxX) { maxY = p.y; }
 				}
 			}
 		}
 		
 		public Tetromino name;
 		public Color color;
-		public int rotations;
 		public Point[] coords;
 		public Rotation[] states;
 		
 		private Configuration(Tetromino tName, Color tColor, int tRotations, Point[] tCoords) {
 			name = tName;
 			color = tColor;
-			rotations = tRotations;
 			coords = tCoords;
 			
-			states = new Rotation[rotations];
-			for (int i = 0; i < rotations; ++i) {
+			states = new Rotation[tRotations];
+			for (int i = 0; i < tRotations; ++i) {
 				states[i] = new Rotation(coords, i);
 			}
 		}

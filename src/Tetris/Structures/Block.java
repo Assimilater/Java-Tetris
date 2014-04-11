@@ -5,53 +5,64 @@ import Tetris.Game;
 import java.awt.*;
 
 public class Block {
+	// Declared statically to reduce memory usage
+	private static Point point = new Point();
+	private static Shape shape;
+	private static Point[] coords;
+	private static Grid.GridCell cell;
 	
 	private Shape block;
 	private Grid pane;
-	private Point location;
-	private int minY;
+	private Point location, maxFall;
 	public Block(Grid g) {
 		block = Shape.nextShape();
 		location = new Point();
+		maxFall = new Point();
 		insert(g);
 	}
 	
-	// The value of minY needs to be accessed enough it's justified to update a member with this method call
-	private void calcMinY() { if (pane != null) minY = block.getMinY(pane, location.x); }
+	// In a Tetromino the lowest y-coordinate is -1, so we can be sure maxFall - 1 will cover all possible collapsible rows
+	private void sink() { Game.sink(location.y - 1); }
 	
-	// In a Tetromino the lowest y-coordinate is -1, so we can be sure minY - 1 will cover all possible collapsible rows
-	private void sink() { Game.sink(minY - 1); }
-	
-	public void insert(Grid g) {
+	public boolean insert(Grid g) {
 		free();
 		pane = g;
 		
 		location.setLocation(g.insertAt());
 		if (location.x == -1) {
-			location.setLocation(-block.getMinX(), block.getMinY(g, -block.getMinX()));
+			location.setLocation(-block.getMinX(), -block.getMinY());
 		}
 		
-		calcMinY();
+		calcShadowDrop();
+		if (maxFall.y > location.y) {
+			return false;
+		}
+		
 		draw();
+		return true;
 	}
+	
+	// Public because the game needs to be able to perform a successful swap on hold
+	public void freeGrid() { free(); pane = null; }
 	
 	private void free() {
 		if (pane != null) {
-			Point[] coords = block.getCoords();
+			coords = block.getCoords();
 			for (Point p : coords) {
+				if (pane.insertAt().x != -1) {
+					pane.cell(maxFall.y + p.y, location.x + p.x).Clear();
+				}
 				pane.cell(location.y + p.y, location.x + p.x).Clear();
-				pane.cell(minY + p.y, location.x + p.x).Clear();
 			}
 		}
 	}
 	
 	private void draw() {
 		if (pane != null) {
-			// This requires two separate loops because a falling block may overlay its shadow partially before it is fully in place
-			Point[] coords = block.getCoords();
+			coords = block.getCoords();
 			if (pane.insertAt().x != -1) {
 				for (Point p : coords) {
-					pane.cell(minY + p.y, location.x + p.x).Shadow();
+					pane.cell(maxFall.y + p.y, location.x + p.x).Shadow();
 				}
 			}
 			for (Point p : coords) {
@@ -62,9 +73,10 @@ public class Block {
 	
 	// It is assumed that all remaining methods will not be called unless this block is the active one in the game
 	public void fall() {
-		if (location.y > minY) {
+		point.setLocation(location);
+		point.translate(0, -1);
+		if (assertLegal(pane, block, point, block, location)) {
 			free();
-			
 			location.translate(0, -1);
 			draw();
 		}
@@ -74,67 +86,96 @@ public class Block {
 	}
 	public void drop() {
 		free();
-		location.setLocation(location.x, minY);
+		location.setLocation(location.x, maxFall.y);
 		draw();
 		sink();
 	}
+	
+	private void calcShadowDrop() {
+		if (pane != null) {
+			maxFall.setLocation(location);
+			maxFall.translate(0, 1);
+			
+			point.setLocation(location);
+			do {
+				if (!assertLegal(pane, block, point, block, null)) { break; }
+				else { point.translate(0, -1); maxFall.translate(0, -1); }
+			} while (true);
+		}
+	}
+	
 	public void rotate() {
-		free();
-		
-		// Make sure that by rotating we don't rotate into another block
-		Shape testShape = new Shape(block);
-		Point testLoc = new Point(location);
-		boolean legal = true;
-		testShape.rotate();
+		shape = block.rotate();
+		point.setLocation(location);
 		
 		// Check if by rotating we've gone out of bounds, and make corrections
-		while (testLoc.x + testShape.getMinX() < 0) {
-			testLoc.translate(1, 0);
-		}
-		while (testLoc.x - 1 + testShape.getMaxX() >= pane.getCols()) {
-			testLoc.translate(-1, 0);
-		}
+		while (point.x + shape.getMinX() < 0) { point.translate(1, 0); }
+		while (point.x + shape.getMaxX() >= pane.getCols()) { point.translate(-1, 0); }
 		
 		// Check and make sure we're not rotating into any previously placed blocks
-		Point[] coords = block.getCoords();
-		Point validate = new Point();
-		for (Point p : coords) {
-			validate.setLocation(p.x + location.x, p.y + location.y);
-			if (validate.y >= 0 && validate.x >= 0 && p.x + validate.x < pane.getCols()) {
-				if (pane.cell(validate.y, validate.x).getState() == Grid.GridState.BLOCK) {
-					legal = false;
-					break;
-				}
-			}
+		if (assertLegal(pane, shape, point, block, location)) {
+			free();
+			
+			block = block.rotate();
+			location.setLocation(point);
+			calcShadowDrop();
+			
+			draw();
 		}
-		
-		if (legal) {
-			block = testShape;
-			location = testLoc;
-			calcMinY();
-		}
-		
-		draw();
 	}
 	
 	public void shiftRight() {
-		if (location.x + block.getMaxX() < pane.getCols() - 1) {
+		point.setLocation(location);
+		point.translate(1, 0);
+		
+		if (assertLegal(pane, block, point, block, location)) {
 			free();
-			if (pane.cell(location.y, location.x + 1 + block.getMaxX()).getState() != Grid.GridState.BLOCK) {
-				location.translate(1, 0);
-				calcMinY();
-			}
+			
+			location.translate(1, 0);
+			calcShadowDrop();
+			
 			draw();
 		}
 	}
 	public void shiftLeft() {
-		if (location.x + block.getMinX() > 0) {
+		point.setLocation(location);
+		point.translate(-1, 0);
+		
+		if (assertLegal(pane, block, point, block, location)) {
 			free();
-			if (pane.cell(location.y, location.x - 1 + block.getMaxX()).getState() != Grid.GridState.BLOCK) {
-				location.translate(-1, 0);
-				calcMinY();
-			}
+			
+			location.translate(-1, 0);
+			calcShadowDrop();
+			
 			draw();
 		}
+	}
+	
+	private static boolean assertLegal(Grid g, Shape s, Point pos, Shape overShape, Point overPos) {
+		if (g == null) { return false; }
+		
+		Point[] points = overShape.getCoords();
+		boolean isOverlap = false;
+		
+		coords = s.getCoords();
+		for (Point p : coords) {
+			if (overPos != null) {
+				isOverlap = false;
+				for (Point p2 : points) {
+					if (p2.x + overPos.x == p.x + pos.x && p2.y + overPos.y == p.y + pos.y) {
+						isOverlap = true;
+						break;
+					}
+				}
+			}
+			
+			if (!isOverlap) {
+				cell = g.cell(pos.y + p.y, pos.x + p.x);
+				if (cell == null || cell.getState() == Grid.GridState.BLOCK) {
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 }

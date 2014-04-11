@@ -109,12 +109,12 @@ public class Game extends JPanel implements ActionListener {
 		linesCountLabel.setText(linesToLevel.toString());
 	}
 	
-	private void getNext() {
+	private boolean getNext() {
 		holdUsed = false;
 		
 		// Dequeue the head element
 		gameBlock = inQueueBlock[0];
-		gameBlock.insert(gameGrid);
+		if (!gameBlock.insert(gameGrid)) { return false; }
 		
 		// Shuffle the queue forward
 		// There's only four elements in this queue so it's not a noticeable performance hit
@@ -126,6 +126,7 @@ public class Game extends JPanel implements ActionListener {
 		
 		// Insert a new block at the tail of the queue
 		inQueueBlock[QUEUE_SIZE - 1] = new Block(inQueueGrid[QUEUE_SIZE - 1]);
+		return true;
 	}
 	
 	// Called when a block "sinks into place"
@@ -135,52 +136,60 @@ public class Game extends JPanel implements ActionListener {
 		//game.linesToLevel -= game.gameGrid.collapseAbove(row);
 		game.updateGameLevel();
 		
-		// TODO: replace false with method call fo overflow check
-		if (false) {
-			JOptionPane.showMessageDialog(MainFrame.getThis(),
-				"Congratulations!\n" +
-				"You made it to:\n" +
-				"Level " + game.level,
-				"Game Over",
-				JOptionPane.INFORMATION_MESSAGE
-			);
-			
-			// Stop the game simply by setting it to null
-			game = null;
+		if (game.getNext()) {
+			game.fallTimer.start();
 		}
 		else {
-			game.getNext();
-			
-			game.fallTimer.start();
+			game.gameOver();
 		}
 	}
 	
 	private void hold() {
-		if (game.holdUsed) {
+		if (holdUsed) {
 			// Alert the user they can't switch again
 			return;
 		}
 		
 		game.fallTimer.stop();
 		
-		if (game.holdBlock != null) {
-			Block temp = game.gameBlock;
+		if (holdBlock != null) {
+			Block temp = gameBlock;
 			
-			game.gameBlock = game.holdBlock;
-			game.holdBlock = temp;
+			gameBlock = holdBlock;
+			holdBlock = temp;
 			
-			game.gameBlock.insert(game.gameGrid);
-			game.holdBlock.insert(game.holdGrid);
+			gameBlock.freeGrid();
+			holdBlock.insert(holdGrid);
+			if (!gameBlock.insert(gameGrid)) {
+				gameOver();
+				return;
+			}
 		}
 		else {
-			game.holdBlock = game.gameBlock;
-			game.holdBlock.insert(game.holdGrid);
+			holdBlock = gameBlock;
+			holdBlock.insert(holdGrid);
 			
-			game.getNext();
+			if (!getNext()) {
+				gameOver();
+				return;
+			}
 		}
 		
-		game.holdUsed = true;
-		game.fallTimer.start();
+		holdUsed = true;
+		fallTimer.start();
+	}
+	
+	private void gameOver() {
+		JOptionPane.showMessageDialog(MainFrame.getThis(),
+			"Congratulations!\n" +
+				"You made it to:\n" +
+				"Level " + level,
+			"Game Over",
+			JOptionPane.INFORMATION_MESSAGE
+		);
+		
+		// Stop the game simply by setting it to null
+		game = null;
 	}
 	
 	// Let block objects handle the key commands

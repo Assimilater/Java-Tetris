@@ -41,7 +41,7 @@ public class Grid extends JPanel {
 		}
 		else {
 			visibleRows = 20; rows = 24; cols = 10;
-			insertion = new Point(5, 19);
+			insertion = new Point(5, 20);
 		}
 		
 		this.setLayout(new GridLayout(visibleRows, cols));

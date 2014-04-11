@@ -26,7 +26,8 @@ public class Grid extends JPanel {
 			block = null;
 		}
 		public void Block(Shape b) {
-			this.setBackground(b.getColor());
+			block = b;
+			this.setBackground(block.getColor());
 			state = GridState.BLOCK;
 		} // TODO: Replace colors with nicer images :)
 	}

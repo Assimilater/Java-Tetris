@@ -22,7 +22,7 @@ public class Block {
 	}
 	
 	// In a Tetromino the lowest y-coordinate is -1, so we can be sure maxFall - 1 will cover all possible collapsible rows
-	private void sink() { Game.sink(location.y - 1); }
+	private void sink() { Game.sink(location.y + block.getMinY()); }
 	
 	public boolean insert(Grid g) {
 		free();

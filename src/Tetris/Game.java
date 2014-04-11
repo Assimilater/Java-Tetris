@@ -90,16 +90,17 @@ public class Game extends JPanel implements ActionListener {
 		}
 		
 		MainFrame.setGamePanel(this);
+		fallTimer.start();
 	}
 	
 	// updateGameLevel - Determine if the number of lines to level up has been reached, if so update the game
 	private void updateGameLevel() {
 		if (linesToLevel <= 0) {
 			++level;
-			linesToLevel += level * 5 + 15;
+			linesToLevel += level * 2 + 10;
 			
-			// Update fall rate: Level 1 fall rate is 1 second, ever level thereafter is half the time
-			fallTimer.setDelay((int) (FALL_RATE * Math.pow(.5, level - 1)));
+			// Update fall rate: Level 1 fall rate is 1 second, ever level thereafter is 10% faster
+			fallTimer.setDelay((int) (FALL_RATE * Math.pow(-.5, level - 1)));
 		}
 		updateLabels();
 	}
@@ -133,7 +134,12 @@ public class Game extends JPanel implements ActionListener {
 	public static void sink(int row) {
 		game.fallTimer.stop();
 		
-		//game.linesToLevel -= game.gameGrid.collapseAbove(row);
+		try {
+			game.linesToLevel -= game.gameGrid.collapseAbove(row);
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
 		game.updateGameLevel();
 		
 		if (game.getNext()) {
@@ -193,7 +199,7 @@ public class Game extends JPanel implements ActionListener {
 	}
 	
 	// Let block objects handle the key commands
-	public static synchronized void executeKey(KEY_COMMAND k) {
+	public static void executeKey(KEY_COMMAND k) {
 		switch (k) {
 			case LEFT:
 				game.gameBlock.shiftLeft();
@@ -224,7 +230,7 @@ public class Game extends JPanel implements ActionListener {
 	// ActionListener
 	public synchronized void actionPerformed(ActionEvent e) {
 		if (e.getSource() == fallTimer) {
-			//game.gameBlock.fall();
+			game.gameBlock.fall();
 		}
 	}
 }

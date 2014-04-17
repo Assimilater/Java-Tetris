@@ -10,32 +10,44 @@ public class Grid extends JPanel {
 	public class GridCell extends JPanel {
 		private GridState state;
 		private Shape block;
+		private Image image;
 		
 		public GridState getState() { return state; }
 		public Shape getBlock() { return block; }
+		private void setImage(Image i) { image = i; this.repaint(); }
+		@Override
+		public void paintComponent(final Graphics g) {
+			super.paintComponent(g);
+			if (image != null) {
+				g.drawImage(image, 0, 0, null);
+			}
+		}
 		
 		public GridCell () { Clear(); }
 		public void Shadow() {
-			this.setBackground(Shape.SHADOW);
+			this.setImage(Shape.SHADOW);
 			state = GridState.SHADOW;
 			block = null;
 		}
 		public void Clear() {
-			this.setBackground(Shape.EMPTY);
+			this.setImage(Shape.EMPTY);
 			state = GridState.EMPTY;
 			block = null;
 		}
 		public void Block(Shape b) {
 			block = b;
-			this.setBackground(block.getColor());
+			this.setImage(block.getColor());
 			state = GridState.BLOCK;
-		} // TODO: Replace colors with nicer images :)
+		}
 	}
 	
 	private int visibleRows, rows, cols;
 	private Point insertion;
 	private GridCell[][] gridCells;
 	public Grid(boolean isPlaceholder) {
+		// Make default background transparent
+		this.setOpaque(false);
+		
 		if (isPlaceholder) {
 			visibleRows = 4; rows = 4; cols = 4;
 			insertion = new Point(-1, -1);

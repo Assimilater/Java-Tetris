@@ -10,9 +10,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class Game extends JPanel implements ActionListener {
-	public enum KEY_COMMAND { LEFT, RIGHT, ROTATE, HOLD, FALL, DROP }
+	public enum KEY_COMMAND { LEFT, RIGHT, ROTATE, HOLD, FALL, DROP, PAUSE }
 	
-	private static final int FALL_RATE = 1000, QUEUE_SIZE = 4;
+	private static final int FALL_RATE = 1000, QUEUE_SIZE = 5;
 	
 	// boolean flag "holdUsed" in case the user tries to stall by switching between hold back and forth
 	private boolean holdUsed;
@@ -34,46 +34,61 @@ public class Game extends JPanel implements ActionListener {
 	public Game() {
 		game = this;
 		this.setLayout(null);
+		this.setOpaque(false);
 		
 		fallTimer = new Timer(FALL_RATE, this);
 		holdUsed = false;
 		
 		JLabel
-		levelLabel = new JLabel("Level: ");
-		levelLabel.setFont(Program.displayFont);
-		levelLabel.setBounds(5, 150, 150, 20);
+		levelLabel = new JLabel("Level:");
+		levelLabel.setForeground(Program.foreground);
+		levelLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		levelLabel.setFont(Program.displayFont(Font.BOLD, 5));
+		levelLabel.setBounds(25, 300, 100, 20);
 		this.add(levelLabel);
 		
 		levelCountLabel = new JLabel("");
-		levelCountLabel.setFont(new Font(Program.displayFont.getFontName(), Font.BOLD, 30));
-		levelCountLabel.setForeground(Color.BLUE);
-		levelCountLabel.setBounds(5, 175, 150, 50);
+		levelCountLabel.setForeground(Color.decode("#6ED3FF"));
+		levelCountLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		levelCountLabel.setFont(Program.displayFont(Font.BOLD, 10));
+		levelCountLabel.setBounds(25, 325, 100, 30);
 		this.add(levelCountLabel);
 		
 		JLabel
-		linesLabel = new JLabel("Lines to Level: ");
-		linesLabel.setFont(Program.displayFont);
-		linesLabel.setBounds(5, 250, 150, 20);
+		linesLabel = new JLabel("Goal:");
+		linesLabel.setForeground(Program.foreground);
+		linesLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		linesLabel.setFont(Program.displayFont(Font.BOLD, 5));
+		linesLabel.setBounds(25, 375, 100, 20);
 		this.add(linesLabel);
 		
 		linesCountLabel = new JLabel("");
-		linesCountLabel.setFont(new Font(Program.displayFont.getFontName(), Font.BOLD, 30));
 		linesCountLabel.setForeground(Color.RED);
-		linesCountLabel.setBounds(5, 275, 150, 50);
+		linesCountLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		linesCountLabel.setFont(Program.displayFont(Font.BOLD, 10));
+		linesCountLabel.setBounds(25, 400, 100, 30);
 		this.add(linesCountLabel);
 		
 		level = 0;
 		linesToLevel = 0;
 		updateGameLevel();
 		
+		JLabel
+		holdLabel = new JLabel("Hold");
+		holdLabel.setForeground(Program.foreground);
+		holdLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		holdLabel.setFont(Program.displayFont(Font.BOLD, 15));
+		holdLabel.setBounds(25, 20, 100, 40);
+		this.add(holdLabel);
+		
 		holdGrid = new Grid(true);
-		holdGrid.setBounds(110, 25, 50, 50);
+		holdGrid.setBounds(25, 70, 100, 100);
 		this.add(holdGrid);
 		
 		holdBlock = null;
 		
 		gameGrid = new Grid(false);
-		gameGrid.setBounds(200, 25, 330, 600);
+		gameGrid.setBounds(150, 10, 305, 600);
 		this.add(gameGrid);
 		
 		gameBlock = new Block(gameGrid);
@@ -81,9 +96,17 @@ public class Game extends JPanel implements ActionListener {
 		inQueueGrid = new Grid[QUEUE_SIZE];
 		inQueueBlock = new Block[QUEUE_SIZE];
 		
+		JLabel
+		nextLabel = new JLabel("Next");
+		nextLabel.setForeground(Program.foreground);
+		nextLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		nextLabel.setFont(Program.displayFont(Font.BOLD, 15));
+		nextLabel.setBounds(480, 20, 100, 40);
+		this.add(nextLabel);
+		
 		for (int i = 0; i < QUEUE_SIZE; ++i) {
 			inQueueGrid[i] = new Grid(true);
-			inQueueGrid[i].setBounds(550, 25 + 50 * i, 50, 50);
+			inQueueGrid[i].setBounds(480, 70 + 110 * i, 100, 100);
 			this.add(inQueueGrid[i]);
 			
 			inQueueBlock[i] = new Block((inQueueGrid[i]));
@@ -97,10 +120,10 @@ public class Game extends JPanel implements ActionListener {
 	private void updateGameLevel() {
 		if (linesToLevel <= 0) {
 			++level;
-			linesToLevel += level * 2 + 10;
+			linesToLevel += level * 2 + 5;
 			
-			// Update fall rate: Level 1 fall rate is 1 second, ever level thereafter is 10% faster
-			fallTimer.setDelay((int) (FALL_RATE * Math.pow(-.5, level - 1)));
+			// Update fall rate: Level 1 fall rate is 1 second, ever level thereafter is 50% faster
+			fallTimer.setDelay((int) (FALL_RATE * Math.pow(1.5, 1 - level)));
 		}
 		updateLabels();
 	}
@@ -185,6 +208,11 @@ public class Game extends JPanel implements ActionListener {
 		fallTimer.start();
 	}
 	
+	public static void pauseGame() { if (game != null) { game.pause(); } }
+	private void pause() {
+		
+	}
+	
 	private void gameOver() {
 		JOptionPane.showMessageDialog(MainFrame.getThis(),
 			"Congratulations!\n" +
@@ -223,6 +251,10 @@ public class Game extends JPanel implements ActionListener {
 			
 			case HOLD:
 				game.hold();
+				break;
+			
+			case PAUSE:
+				game.pause();
 				break;
 		}
 	}

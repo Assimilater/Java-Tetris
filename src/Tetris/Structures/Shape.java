@@ -1,5 +1,7 @@
 package Tetris.Structures;
 
+import Tetris.Program;
+
 import java.awt.*;
 import java.util.Random;
 
@@ -16,7 +18,7 @@ public class Shape {
 	
 	// Accessors
 	public Tetromino getName() { return configs[config].name; }
-	public Color getColor() { return configs[config].color; }
+	public Image getColor() { return configs[config].color; }
 	public Point[] getCoords() { return configs[config].states[state].coords; }
 	
 	// Boundary-checking properties
@@ -28,35 +30,34 @@ public class Shape {
 	// BELOW THIS POINT CONTAINS STRICTLY STATICALLY REFERENCED DATA OBJECTS
 	public static enum Tetromino { SBlock, ZBlock, LineBlock, TBlock, SquareBlock, LBlock, MirroredLBlock }
 	
-	// TODO: Replace colors with nicer images :)
-	public static final Color SHADOW = Color.GRAY, EMPTY = Color.BLACK;
+	public static final Image SHADOW = Program.getImage("Shadow"), EMPTY = Program.getImage("Empty");
 	private static final Configuration[] configs = new Configuration[] {
 		new Configuration(
-			Tetromino.SBlock, Color.GREEN, 2,
-			new Point[]{new Point( 0, -1), new Point(0,  0), new Point(-1, 0), new Point(-1, 1)}
-		),
-		new Configuration(
-			Tetromino.ZBlock, Color.PINK, 2,
-			new Point[]{new Point( 0, -1), new Point(0,  0), new Point( 1, 0), new Point( 1, 1)}
-		),
-		new Configuration(
-			Tetromino.LineBlock, Color.CYAN, 2,
+			Tetromino.LineBlock, Program.getImage("Line"), 2,
 			new Point[]{new Point( 0, -1), new Point(0,  0), new Point( 0, 1), new Point( 0, 2)}
 		),
 		new Configuration(
-			Tetromino.TBlock, Color.MAGENTA, 4,
+			Tetromino.SBlock, Program.getImage("S"), 2,
+			new Point[]{new Point( 0, -1), new Point(0,  0), new Point(-1, 0), new Point(-1, 1)}
+		),
+		new Configuration(
+			Tetromino.ZBlock, Program.getImage("Z"), 2,
+			new Point[]{new Point( 0, -1), new Point(0,  0), new Point( 1, 0), new Point( 1, 1)}
+		),
+		new Configuration(
+			Tetromino.TBlock, Program.getImage("T"), 4,
 			new Point[]{new Point(-1,  0), new Point(0,  0), new Point( 1, 0), new Point( 0, 1)}
 		),
 		new Configuration(
-			Tetromino.SquareBlock, Color.YELLOW, 1,
+			Tetromino.SquareBlock, Program.getImage("Square"), 1,
 			new Point[]{new Point( 0,  0), new Point(1,  0), new Point( 0, 1), new Point( 1, 1)}
 		),
 		new Configuration(
-			Tetromino.LBlock, Color.BLUE, 4,
+			Tetromino.LBlock, Program.getImage("L"), 4,
 			new Point[]{new Point(-1, -1), new Point(0, -1), new Point( 0, 0), new Point( 0, 1)}
 		),
 		new Configuration(
-			Tetromino.MirroredLBlock, Color.ORANGE, 4,
+			Tetromino.MirroredLBlock, Program.getImage("MirroredL"), 4,
 			new Point[]{new Point( 1, -1), new Point(0, -1), new Point( 0, 0), new Point( 0, 1)}
 		)
 	};
@@ -91,11 +92,11 @@ public class Shape {
 		}
 		
 		public Tetromino name;
-		public Color color;
+		public Image color;
 		public Point[] coords;
 		public Rotation[] states;
 		
-		private Configuration(Tetromino tName, Color tColor, int tRotations, Point[] tCoords) {
+		private Configuration(Tetromino tName, Image tColor, int tRotations, Point[] tCoords) {
 			name = tName;
 			color = tColor;
 			coords = tCoords;

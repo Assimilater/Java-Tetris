@@ -8,7 +8,7 @@ import java.awt.*;
 import java.awt.event.*;
 
 public class MainFrame extends JFrame implements ActionListener, KeyListener, WindowListener {
-	private static final int WIDTH = 625, HEIGHT = 715;
+	private static final int WIDTH = 605, HEIGHT = 685;
 	private static final String TITLE = "Tetris!";
 	
 	private JPanel contentPanel;
@@ -22,8 +22,8 @@ public class MainFrame extends JFrame implements ActionListener, KeyListener, Wi
 		instance = this;
 		
 		this.setTitle(TITLE);
-		this.setSize(WIDTH, HEIGHT);
 		this.setResizable(false);
+		this.setSize(WIDTH, HEIGHT);
 		this.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		this.setLocationRelativeTo(null);
 		this.addWindowListener(this);
@@ -31,6 +31,7 @@ public class MainFrame extends JFrame implements ActionListener, KeyListener, Wi
 		
 		contentPanel = new JPanel();
 		contentPanel.setLayout(new BorderLayout());
+		contentPanel.setBackground(Program.background);
 		
 		NewGameMenuItem = new JMenuItem("New Game");
 		NewGameMenuItem.addActionListener(this);
@@ -103,20 +104,24 @@ public class MainFrame extends JFrame implements ActionListener, KeyListener, Wi
 
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == NewGameMenuItem) {
+			Game.pauseGame();
 			if (confirmQuit("New Game")) {
 				new Game();
 			}
 		}
 		else if (e.getSource() == OptionsMenuItem) {
+			Game.pauseGame();
 			new Options();
 		}
-
+		
 		else if (e.getSource() == ExitMenuItem) {
+			Game.pauseGame();
 			if (confirmQuit("Exit")) {
 				System.exit(0);
 			}
 		}
 		else if (e.getSource() == HowtoMenuItem) {
+			Game.pauseGame();
 			new Instructions();
 		}
 		else if (e.getSource() == AboutMenuItem) {
@@ -146,7 +151,13 @@ public class MainFrame extends JFrame implements ActionListener, KeyListener, Wi
 	
 	// KeyListener methods
 	public void keyPressed(KeyEvent e) {
-		if (Game.isActive()) {
+		if (e.getKeyCode() == KeyEvent.VK_N && ((e.getModifiers() & KeyEvent.CTRL_MASK) != 0)) {
+			Game.pauseGame();
+			if (confirmQuit("New Game")) {
+				new Game();
+			}
+		}
+		else if (Game.isActive()) {
 			Game.KEY_COMMAND k = null;
 			switch (e.getKeyCode()) {
 				case KeyEvent.VK_LEFT:
@@ -172,8 +183,12 @@ public class MainFrame extends JFrame implements ActionListener, KeyListener, Wi
 				case KeyEvent.VK_SHIFT:
 					k = Game.KEY_COMMAND.HOLD;
 					break;
+				
+				case KeyEvent.VK_ESCAPE: case KeyEvent.VK_P:
+					k = Game.KEY_COMMAND.PAUSE;
+					break;
 			}
-			Game.executeKey(k);
+			if (k != null) { Game.executeKey(k); }
 		}
 	}
 	public void keyReleased(KeyEvent e) { }

@@ -129,7 +129,7 @@ public class MainFrame extends JFrame implements ActionListener, KeyListener, Wi
 				"About Tetris:\n" +
 				"Student Name:  John Call\n" +
 				"Student A#:        A01283897\n" +
-				"CS2410 ~ USU",
+				"CS 2410 ~ USU",
 				"About Tetris",
 				JOptionPane.INFORMATION_MESSAGE
 			);

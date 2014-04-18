@@ -110,7 +110,7 @@ public class Options extends JDialog implements ActionListener {
 			}
 			else if (!Game.isActive()) {
 				if (JOptionPane.YES_OPTION == JOptionPane.showConfirmDialog(rel, "Start a new game?", C_TITLE, JOptionPane.YES_NO_OPTION)) {
-					return new Update(true, false, true);
+					return new Update(true, true, true);
 				}
 			}
 			return new Update(true, false, true);

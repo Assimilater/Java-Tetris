@@ -93,6 +93,8 @@ public class MainFrame extends JFrame implements ActionListener, KeyListener, Wi
 	
 	// boolean confirmExit() show a confirmation if a game is active before closing the program
 	private static boolean confirmQuit(String title) {
+		Game.pauseGame();
+		
 		return
 			!Game.isActive() ||
 			JOptionPane.NO_OPTION != JOptionPane.showConfirmDialog(instance,
@@ -104,7 +106,6 @@ public class MainFrame extends JFrame implements ActionListener, KeyListener, Wi
 
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == NewGameMenuItem) {
-			Game.pauseGame();
 			if (confirmQuit("New Game")) {
 				new Game();
 			}
@@ -115,7 +116,6 @@ public class MainFrame extends JFrame implements ActionListener, KeyListener, Wi
 		}
 		
 		else if (e.getSource() == ExitMenuItem) {
-			Game.pauseGame();
 			if (confirmQuit("Exit")) {
 				System.exit(0);
 			}
@@ -125,6 +125,7 @@ public class MainFrame extends JFrame implements ActionListener, KeyListener, Wi
 			new Instructions();
 		}
 		else if (e.getSource() == AboutMenuItem) {
+			Game.pauseGame();
 			JOptionPane.showMessageDialog(this,
 				"About Tetris:\n" +
 				"Student Name:  John Call\n" +

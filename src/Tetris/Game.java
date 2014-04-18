@@ -15,8 +15,10 @@ public class Game extends JPanel implements ActionListener {
 	private static final int FALL_RATE = 1000, QUEUE_SIZE = 5;
 	
 	// boolean flag "holdUsed" in case the user tries to stall by switching between hold back and forth
-	private boolean holdUsed;
+	private boolean holdUsed, paused;
 	private Timer fallTimer;
+	
+	private JButton resumeButton;
 	
 	private Block holdBlock, gameBlock;
 	private Block[] inQueueBlock;
@@ -40,6 +42,11 @@ public class Game extends JPanel implements ActionListener {
 		
 		fallTimer = new Timer(FALL_RATE, this);
 		holdUsed = false;
+		
+		resumeButton = new JButton("Click to Resume");
+		resumeButton.setFont(Program.displayFont);
+		resumeButton.setBounds(215, 290, 175 ,30); //gameGrid.setBounds(150, 10, 305, 600);
+		resumeButton.addActionListener(this);
 		
 		JLabel
 		levelLabel = new JLabel("Level:");
@@ -210,11 +217,6 @@ public class Game extends JPanel implements ActionListener {
 		fallTimer.start();
 	}
 	
-	public static void pauseGame() { if (game != null) { game.pause(); } }
-	private void pause() {
-		
-	}
-	
 	private void gameOver() {
 		JOptionPane.showMessageDialog(MainFrame.getThis(),
 			"Congratulations!\n" +
@@ -236,10 +238,18 @@ public class Game extends JPanel implements ActionListener {
 				game.inQueueGrid[i].repaintGrid();
 			}
 		}
+		MainFrame.getThis().repaint();
+		MainFrame.getThis().revalidate();
 	}
 	
 	// Let block objects handle the key commands
 	public static void executeKey(KEY_COMMAND k) {
+		if (game.paused) {
+			if (k == KEY_COMMAND.PAUSE) {
+				game.resume();
+			}
+			return;
+		}
 		switch (k) {
 			case LEFT:
 				game.gameBlock.shiftLeft();
@@ -271,10 +281,45 @@ public class Game extends JPanel implements ActionListener {
 		}
 	}
 	
+	public static void pauseGame() { if (game != null) { game.pause(); } }
+	private void pause() {
+		fallTimer.stop();
+		paused = true;
+		
+		this.add(resumeButton);
+		
+		this.remove(gameGrid);
+		this.remove(holdGrid);
+		for (int i = 0; i < QUEUE_SIZE; ++i) {
+			this.remove(inQueueGrid[i]);
+		}
+		
+		repaintGrid();
+		this.add(resumeButton);
+	}
+	private void resume() {
+		this.remove(resumeButton);
+		
+		this.add(gameGrid);
+		this.add(holdGrid);
+		for (int i = 0; i < QUEUE_SIZE; ++i) {
+			this.add(inQueueGrid[i]);
+		}
+		
+		MainFrame.getThis().requestFocus();
+		
+		repaintGrid();
+		paused = false;
+		fallTimer.start();
+	}
+	
 	// ActionListener
 	public synchronized void actionPerformed(ActionEvent e) {
 		if (e.getSource() == fallTimer) {
 			game.gameBlock.fall();
+		}
+		else if (e.getSource() == resumeButton) {
+			game.resume();
 		}
 	}
 }

@@ -32,6 +32,8 @@ public class Game extends JPanel implements ActionListener {
 	public static boolean isActive() { return game != null; }
 	
 	public Game() {
+		if (game != null) { game.fallTimer.stop(); }
+		
 		game = this;
 		this.setLayout(null);
 		this.setOpaque(false);

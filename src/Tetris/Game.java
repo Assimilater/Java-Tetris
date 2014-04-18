@@ -1,6 +1,7 @@
 package Tetris;
 
 import Tetris.Forms.MainFrame;
+import Tetris.Forms.Options;
 import Tetris.Structures.Block;
 import Tetris.Structures.Grid;
 
@@ -17,6 +18,8 @@ public class Game extends JPanel implements ActionListener {
 	// boolean flag "holdUsed" in case the user tries to stall by switching between hold back and forth
 	private boolean holdUsed, paused;
 	private Timer fallTimer;
+	
+	private Options.Difficulty difficulty;
 	
 	private JButton resumeButton;
 	
@@ -39,6 +42,8 @@ public class Game extends JPanel implements ActionListener {
 		game = this;
 		this.setLayout(null);
 		this.setOpaque(false);
+		
+		difficulty = Options.difficulty;
 		
 		fallTimer = new Timer(FALL_RATE, this);
 		holdUsed = false;
@@ -131,8 +136,17 @@ public class Game extends JPanel implements ActionListener {
 			++level;
 			linesToLevel += level * 2 + 5;
 			
-			// Update fall rate: Level 1 fall rate is 1 second, ever level thereafter is 50% faster
-			fallTimer.setDelay((int) (FALL_RATE * Math.pow(1.5, 1 - level)));
+			// Update fall rate
+			switch (difficulty) {
+				case Normal:
+					// Level 1 fall rate is 1 second, ever level thereafter decrease by 50 ms
+					fallTimer.setDelay(FALL_RATE - (50 * level));
+					break;
+				case Hard:
+					// Level 1 fall rate is 1 second, ever level thereafter is 50% faster
+					fallTimer.setDelay((int) (FALL_RATE * Math.pow(1.5, 1 - level)));
+					break;
+			}
 		}
 		updateLabels();
 	}

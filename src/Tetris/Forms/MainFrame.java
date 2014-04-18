@@ -62,7 +62,7 @@ public class MainFrame extends JFrame implements ActionListener, KeyListener, Wi
 		gameMenu = new JMenu("Game");
 		gameMenu.setFont(Program.displayFont);
 		gameMenu.add(NewGameMenuItem);
-		//gameMenu.add(OptionsMenuItem);
+		gameMenu.add(OptionsMenuItem);
 		gameMenu.add(ExitMenuItem);
 		
 		JMenu
@@ -151,7 +151,7 @@ public class MainFrame extends JFrame implements ActionListener, KeyListener, Wi
 	
 	// KeyListener methods
 	public void keyPressed(KeyEvent e) {
-		if (e.getKeyCode() == KeyEvent.VK_N && ((e.getModifiers() & KeyEvent.CTRL_MASK) != 0)) {
+		if (e.getKeyCode() == KeyEvent.VK_F2 || (e.getKeyCode() == KeyEvent.VK_N && ((e.getModifiers() & KeyEvent.CTRL_MASK) != 0))) {
 			Game.pauseGame();
 			if (confirmQuit("New Game")) {
 				new Game();

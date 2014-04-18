@@ -66,7 +66,7 @@ public class Block {
 				}
 			}
 			for (Point p : coords) {
-				pane.cell(location.y + p.y, location.x + p.x).Block(block);
+				pane.cell(location.y + p.y, location.x + p.x).Block(block.getName());
 			}
 		}
 	}

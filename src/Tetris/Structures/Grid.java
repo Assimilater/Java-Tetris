@@ -1,43 +1,40 @@
 package Tetris.Structures;
 
+import Tetris.Assets;
+
 import javax.swing.*;
 import java.awt.*;
 
 public class Grid extends JPanel {
-	
-	public enum GridState { EMPTY, SHADOW, BLOCK }
-	
+	public static enum GridState { EMPTY, SHADOW, BLOCK }
 	public class GridCell extends JPanel {
 		private GridState state;
-		private Shape block;
-		private Image image;
+		private Shape.Tetromino block;
+		private boolean isBig;
 		
 		public GridState getState() { return state; }
-		public Shape getBlock() { return block; }
-		private void setImage(Image i) { image = i; this.repaint(); }
+		public Shape.Tetromino getBlock() { return block; }
 		@Override
 		public void paintComponent(final Graphics g) {
 			super.paintComponent(g);
-			if (image != null) {
-				g.drawImage(image, 0, 0, null);
-			}
+			Assets.paint(block, isBig, this, g);
 		}
 		
-		public GridCell () { Clear(); }
+		public GridCell (boolean big) { Clear(); isBig = big; }
 		public void Shadow() {
-			this.setImage(Shape.SHADOW);
 			state = GridState.SHADOW;
-			block = null;
+			block = Shape.Tetromino.Shadow;
+			this.repaint();
 		}
 		public void Clear() {
-			this.setImage(Shape.EMPTY);
 			state = GridState.EMPTY;
-			block = null;
+			block = Shape.Tetromino.Empty;
+			this.repaint();
 		}
-		public void Block(Shape b) {
-			block = b;
-			this.setImage(block.getColor());
+		public void Block(Shape.Tetromino b) {
 			state = GridState.BLOCK;
+			block = b;
+			this.repaint();
 		}
 	}
 	
@@ -62,7 +59,7 @@ public class Grid extends JPanel {
 		gridCells = new GridCell[rows][cols];
 		for (int i = 0; i < rows; ++i) {
 			for (int j = 0; j < cols; ++j) {
-				gridCells[i][j] = new GridCell();
+				gridCells[i][j] = new GridCell(!isPlaceholder);
 			}
 		}
 		
@@ -130,5 +127,13 @@ public class Grid extends JPanel {
 		
 		// Base case 3: The row is partially full, continue recursive search
 		return collapseAbove(row + 1);
+	}
+	
+	public void repaintGrid() {
+		for (int i = 0; i < rows; ++i) {
+			for (int j = 0; j < cols; ++j) {
+				gridCells[i][j].repaint();
+			}
+		}
 	}
 }

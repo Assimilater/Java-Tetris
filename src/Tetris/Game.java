@@ -228,6 +228,16 @@ public class Game extends JPanel implements ActionListener {
 		game = null;
 	}
 	
+	public static void repaintGrid() {
+		if (game != null) {
+			game.gameGrid.repaintGrid();
+			game.holdGrid.repaintGrid();
+			for (int i = 0; i < QUEUE_SIZE; ++i) {
+				game.inQueueGrid[i].repaintGrid();
+			}
+		}
+	}
+	
 	// Let block objects handle the key commands
 	public static void executeKey(KEY_COMMAND k) {
 		switch (k) {

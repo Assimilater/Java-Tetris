@@ -65,11 +65,11 @@ A very significant bonus awaits you if you can clear the entire grid!
 |                                 OUTSTANDING BUG                                 |
 +---------------------------------------------------------------------------------+
 
-When playing with an imaged theme, when the program first opens the images will
-sometimes fail to be drawn appropriately. I have not yet found a solution to this
-and this seems to happen sporadically. It will go away after a minute of playing
+When playing with an imaged theme, the first couple minutes the program is open the
+images will sometimes fail to be drawn appropriately. I have not yet found a solution
+to this and this seems to happen sporadically. It will go away after a minute of playing
 and you can also force the images to repaint by dragging the window off the screen
-just out of your desktops viewing area and then drag it back into visibility. 
+just out of your desktops viewing area and then drag it back into visibility.
 
 +---------------------------------------------------------------------------------+
 |                       OTHER INFORMATION ABOUT THIS PROJECT                      |
@@ -81,3 +81,6 @@ Adding themes can be done easily, though admittedly you do need to add one line 
 code for each new theme due to the fact that it was also designed to be ready to
 export to a jar, and I have not yet found a way to loop through folders packaged
 as resources in a jar.
+
+Also my code's on GitHub. How cool is that? Instead of unzipping this you could have
+cloned it from GitHub with IntelliJ! https://github.com/Assimilater/Java-Tetris/

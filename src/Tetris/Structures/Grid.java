@@ -129,6 +129,17 @@ public class Grid extends JPanel {
 		return collapseAbove(row + 1);
 	}
 	
+	public boolean checkIfAllEmpty() {
+		for (int i = 0; i < rows; ++i) {
+			for (int j = 0; j < cols; ++j) {
+				if (gridCells[i][j].getState() != GridState.EMPTY) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+	
 	public void wipe() {
 		for (int i = 0; i < rows; ++i) {
 			for (int j = 0; j < cols; ++j) {

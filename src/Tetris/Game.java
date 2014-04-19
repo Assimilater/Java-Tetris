@@ -296,6 +296,11 @@ public class Game extends JPanel implements ActionListener {
 			
 			// Score weighs number of lines removed twice as heavily but still gives a noticeable bonus for consecutive completions
 			game.score += (lines * game.level * 10) + (game.consecutive * game.level * 5);
+			
+			if (game.gameGrid.checkIfAllEmpty()) {
+				// This is a relatively rare occurrence, anyone deserves big points for it :)
+				game.score += (250 * game.level);
+			}
 		}
 		
 		game.linesToLevel -= lines;

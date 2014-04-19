@@ -57,10 +57,27 @@ Shift       Swap Falling Tetris Block with Hold Item (Can't be used twice in a r
 Esc, P      Pause/Resume Game
 Ctrl+N, F2  New Game
 
-You are awarded more points for clearing more rows at a time, as well as more consecutive rows!
+You are awarded more points for clearing more rows at a time.
+You are also awarded more points for clearing more consecutive rows!
+A very significant bonus awaits you if you can clear the entire grid!
 
++---------------------------------------------------------------------------------+
+|                                 OUTSTANDING BUG                                 |
++---------------------------------------------------------------------------------+
+
+When playing with an imaged theme, when the program first opens the images will
+sometimes fail to be drawn appropriately. I have not yet found a solution to this
+and this seems to happen sporadically. It will go away after a minute of playing
+and you can also force the images to repaint by dragging the window off the screen
+just out of your desktops viewing area and then drag it back into visibility. 
 
 +---------------------------------------------------------------------------------+
 |                       OTHER INFORMATION ABOUT THIS PROJECT                      |
+|                              WHY YOU SHOULD PICK ME                             |
 +---------------------------------------------------------------------------------+
 
+This project was designed with the ability to grow. It is well modularized.
+Adding themes can be done easily, though admittedly you do need to add one line of
+code for each new theme due to the fact that it was also designed to be ready to
+export to a jar, and I have not yet found a way to loop through folders packaged
+as resources in a jar.

@@ -70,21 +70,24 @@ public class Game extends JPanel implements ActionListener {
 		resumeButton.setFont(Program.displayFont);
 		resumeButton.setBounds(215, 290, 175 ,30); //gameGrid.setBounds(150, 10, 305, 600);
 		resumeButton.addActionListener(this);
-
+		
 		JLabel
 		livesLabel = new JLabel("Lives:");
 		livesLabel.setForeground(Program.foreground);
 		livesLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		livesLabel.setFont(Program.displayFont(Font.BOLD, 5));
 		livesLabel.setBounds(25, 225, 100, 20);
-		this.add(livesLabel);
 		
 		livesCountLabel = new JLabel("");
 		livesCountLabel.setForeground(Color.YELLOW);
 		livesCountLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		livesCountLabel.setFont(Program.displayFont(Font.BOLD, 10));
 		livesCountLabel.setBounds(25, 250, 100, 30);
-		this.add(livesCountLabel);
+		
+		if (multipleLives) {
+			this.add(livesLabel);
+			this.add(livesCountLabel);
+		}
 		
 		JLabel
 		levelLabel = new JLabel("Level:");
@@ -198,31 +201,37 @@ public class Game extends JPanel implements ActionListener {
 	// updateGameLevel - Determine if the number of lines to level up has been reached, if so update the game
 	private boolean updateGameLevel() {
 		if (linesToLevel <= 0) {
+			int delay;
 			switch (difficulty) {
 				case Normal:
 					++level;
 					linesToLevel += (int)(level * 1.25) + 5;
 					
 					// Level 1 fall rate is 1 second, ever level thereafter decrease by 50 ms
-					fallTimer.setDelay(FALL_RATE - (75 * level));
+					delay = FALL_RATE - (75 * level);
 					break;
+				
 				case Hard:
 					++level;
 					linesToLevel += level * 2 + 5;
 					
 					// Level 1 fall rate is 1 second, ever level thereafter is 50% faster
-					fallTimer.setDelay((int) (FALL_RATE * Math.pow(1.5, 1 - level)));
+					delay = (int)(FALL_RATE * Math.pow(1.5, 1 - level));
 					break;
+				
+				default:
+					delay = FALL_RATE;
 			}
+			
+			// Let's not allow the timer to get too low...
+			if (delay <= 10) {
+				gameOver(true);
+				return false;
+			}
+			fallTimer.setDelay(delay);
 		}
 		updateLabels();
 		
-		// Let's not allow the timer to get too low...
-		System.out.println(fallTimer.getDelay());
-		if (fallTimer.getDelay() <= 10) {
-			gameOver();
-			return false;
-		}
 		return true;
 	}
 	
@@ -295,7 +304,7 @@ public class Game extends JPanel implements ActionListener {
 			if (game.getNext()) {
 				game.fallTimer.start();
 			} else {
-				game.gameOver();
+				game.gameOver(false);
 			}
 		}
 	}
@@ -317,7 +326,7 @@ public class Game extends JPanel implements ActionListener {
 			gameBlock.freeGrid();
 			holdBlock.insert(holdGrid);
 			if (!insertBlock(gameBlock)) {
-				gameOver();
+				gameOver(false);
 				return;
 			}
 		}
@@ -326,7 +335,7 @@ public class Game extends JPanel implements ActionListener {
 			holdBlock.insert(holdGrid);
 			
 			if (!getNext()) {
-				gameOver();
+				gameOver(false);
 				return;
 			}
 		}
@@ -335,14 +344,14 @@ public class Game extends JPanel implements ActionListener {
 		fallTimer.start();
 	}
 	
-	private void gameOver() {
+	private void gameOver(boolean completed) {
 		boolean beatRecord = score > highScore.get(multipleLives).get(difficulty);
 		if (beatRecord) {
 			highScore.get(multipleLives).put(difficulty, score);
 		}
 		JOptionPane.showMessageDialog(MainFrame.getThis(),
 			"Congratulations!\n" +
-				(fallTimer.getDelay() > 10
+				(!completed
 					?
 					"You made it to:\n" +
 					"Level " + level

@@ -129,6 +129,14 @@ public class Grid extends JPanel {
 		return collapseAbove(row + 1);
 	}
 	
+	public void wipe() {
+		for (int i = 0; i < rows; ++i) {
+			for (int j = 0; j < cols; ++j) {
+				gridCells[i][j].Clear();
+			}
+		}
+	}
+	
 	public void repaintGrid() {
 		for (int i = 0; i < rows; ++i) {
 			for (int j = 0; j < cols; ++j) {

@@ -21,6 +21,8 @@ public class Game extends JPanel implements ActionListener {
 	private Timer fallTimer;
 	
 	private Options.Difficulty difficulty;
+	private Boolean multipleLives;
+	private Integer lives;
 	
 	private JButton resumeButton;
 	
@@ -30,16 +32,21 @@ public class Game extends JPanel implements ActionListener {
 	private Grid gameGrid, holdGrid;
 	private Grid[] inQueueGrid;
 
-	private static HashMap<Options.Difficulty, Integer> highScore;
+	private static HashMap<Boolean, HashMap<Options.Difficulty, Integer>> highScore;
 	static {
-		highScore = new HashMap<Options.Difficulty, Integer>();
+		highScore = new HashMap<Boolean, HashMap<Options.Difficulty, Integer>>();
+		highScore.put(true, new HashMap<Options.Difficulty, Integer>());
 		for (Options.Difficulty d : Options.Difficulty.values()) {
-			highScore.put(d, 0);
+			highScore.get(true).put(d, 0);
+		}
+		highScore.put(false, new HashMap<Options.Difficulty, Integer>());
+		for (Options.Difficulty d : Options.Difficulty.values()) {
+			highScore.get(false).put(d, 0);
 		}
 	}
 	
 	private Integer level, linesToLevel, score, consecutive;
-	private JLabel levelCountLabel, linesCountLabel, scoreCountLabel, highScoreCountLabel;
+	private JLabel livesCountLabel, levelCountLabel, linesCountLabel, scoreCountLabel, highScoreCountLabel;
 	
 	// This exists because there will only be a single instance that can be tracked statically
 	private static Game game;
@@ -53,6 +60,8 @@ public class Game extends JPanel implements ActionListener {
 		this.setOpaque(false);
 		
 		difficulty = Options.difficulty;
+		multipleLives = Options.multipleLives;
+		lives = multipleLives ? 3 : 1;
 		
 		fallTimer = new Timer(FALL_RATE, this);
 		holdUsed = false;
@@ -61,6 +70,21 @@ public class Game extends JPanel implements ActionListener {
 		resumeButton.setFont(Program.displayFont);
 		resumeButton.setBounds(215, 290, 175 ,30); //gameGrid.setBounds(150, 10, 305, 600);
 		resumeButton.addActionListener(this);
+
+		JLabel
+		livesLabel = new JLabel("Lives:");
+		livesLabel.setForeground(Program.foreground);
+		livesLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		livesLabel.setFont(Program.displayFont(Font.BOLD, 5));
+		livesLabel.setBounds(25, 225, 100, 20);
+		this.add(livesLabel);
+		
+		livesCountLabel = new JLabel("");
+		livesCountLabel.setForeground(Color.YELLOW);
+		livesCountLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		livesCountLabel.setFont(Program.displayFont(Font.BOLD, 10));
+		livesCountLabel.setBounds(25, 250, 100, 30);
+		this.add(livesCountLabel);
 		
 		JLabel
 		levelLabel = new JLabel("Level:");
@@ -99,7 +123,7 @@ public class Game extends JPanel implements ActionListener {
 		scoreLabel.setFont(Program.displayFont(Font.BOLD, 5));
 		scoreLabel.setBounds(25, 450, 100, 20);
 		this.add(scoreLabel);
-
+		
 		scoreCountLabel = new JLabel("");
 		scoreCountLabel.setForeground(Color.decode("#6ED3FF"));
 		scoreCountLabel.setHorizontalAlignment(SwingConstants.CENTER);
@@ -203,9 +227,10 @@ public class Game extends JPanel implements ActionListener {
 	}
 	
 	private void updateLabels() {
+		livesCountLabel.setText(lives.toString());
 		levelCountLabel.setText(level.toString());
 		linesCountLabel.setText(linesToLevel.toString());
-		highScoreCountLabel.setText(highScore.get(difficulty).toString());
+		highScoreCountLabel.setText(highScore.get(multipleLives).get(difficulty).toString());
 		scoreCountLabel.setText(score.toString());
 	}
 	
@@ -214,7 +239,7 @@ public class Game extends JPanel implements ActionListener {
 		
 		// Dequeue the head element
 		gameBlock = inQueueBlock[0];
-		if (!gameBlock.insert(gameGrid)) { return false; }
+		if (!insertBlock(gameBlock)) { return false; }
 		
 		// Shuffle the queue forward
 		// There's only four elements in this queue so it's not a noticeable performance hit
@@ -228,7 +253,19 @@ public class Game extends JPanel implements ActionListener {
 		inQueueBlock[QUEUE_SIZE - 1] = new Block(inQueueGrid[QUEUE_SIZE - 1]);
 		return true;
 	}
-	
+
+	private boolean insertBlock(Block gameBlock) {
+		if (!gameBlock.insert(gameGrid)) {
+			--lives;
+			if (lives != 0) {
+				gameGrid.wipe();
+				return gameBlock.insert(gameGrid);
+			}
+			return false;
+		}
+		return true;
+	}
+
 	// Called when a block "sinks into place"
 	public static void sink(int row) {
 		game.fallTimer.stop();
@@ -265,7 +302,7 @@ public class Game extends JPanel implements ActionListener {
 	
 	private void hold() {
 		if (holdUsed) {
-			// Alert the user they can't switch again
+			// TODO: Alert the user they can't switch again with perhaps a sound
 			return;
 		}
 		
@@ -279,7 +316,7 @@ public class Game extends JPanel implements ActionListener {
 			
 			gameBlock.freeGrid();
 			holdBlock.insert(holdGrid);
-			if (!gameBlock.insert(gameGrid)) {
+			if (!insertBlock(gameBlock)) {
 				gameOver();
 				return;
 			}
@@ -299,9 +336,9 @@ public class Game extends JPanel implements ActionListener {
 	}
 	
 	private void gameOver() {
-		boolean beatRecord = score > highScore.get(difficulty);
+		boolean beatRecord = score > highScore.get(multipleLives).get(difficulty);
 		if (beatRecord) {
-			highScore.put(difficulty, score);
+			highScore.get(multipleLives).put(difficulty, score);
 		}
 		JOptionPane.showMessageDialog(MainFrame.getThis(),
 			"Congratulations!\n" +

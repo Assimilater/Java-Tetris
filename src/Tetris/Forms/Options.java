@@ -20,10 +20,12 @@ public class Options extends JDialog implements ActionListener {
 	public static enum Difficulty { Normal, Hard }
 	public static Difficulty difficulty = Difficulty.Normal;
 	public static String theme = Assets.defaultTheme;
+	public static boolean multipleLives = false;
 	
 	private Container pane;
 	private JComboBox<String> themeSelect;
 	private JComboBox<String> difficultySelect;
+	private JCheckBox multipleLivesCheck;
 	private JButton Ok, Cancel;
 	
 	public Options() {
@@ -40,7 +42,8 @@ public class Options extends JDialog implements ActionListener {
 		JLabel
 		themeLabel = new JLabel("Theme:");
 		themeLabel.setFont(Program.displayFont);
-		themeLabel.setBounds(5, 10, 100, 15);
+		themeLabel.setBounds(5, 5, 100, 25);
+		themeLabel.setVerticalAlignment(SwingConstants.CENTER);
 		this.add(themeLabel);
 		
 		themeSelect = new JComboBox<String>(new Vector<String>(Assets.themes.keySet()));
@@ -53,7 +56,8 @@ public class Options extends JDialog implements ActionListener {
 		JLabel
 		difficultyLabel = new JLabel("Difficulty:");
 		difficultyLabel.setFont(Program.displayFont);
-		difficultyLabel.setBounds(5, 45, 100, 15);
+		difficultyLabel.setBounds(5, 40, 100, 25);
+		difficultyLabel.setVerticalAlignment(SwingConstants.CENTER);
 		this.add(difficultyLabel);
 		
 		difficultySelect = new JComboBox<String>();
@@ -65,6 +69,12 @@ public class Options extends JDialog implements ActionListener {
 		difficultySelect.setFont(Program.displayFont);
 		difficultySelect.setBounds(110, 40, 200, 25);
 		this.add(difficultySelect);
+		
+		multipleLivesCheck = new JCheckBox("Multiple Lives", multipleLives);
+		multipleLivesCheck.setFont(Program.displayFont);
+		multipleLivesCheck.setBounds(5, 75, 300, 25);
+		multipleLivesCheck.setVerticalAlignment(SwingConstants.CENTER);
+		this.add(multipleLivesCheck);
 		
 		Ok = new JButton("Ok");
 		Ok.setBounds(5, HEIGHT - 68, (WIDTH - 20) / 2, 30);
@@ -93,12 +103,13 @@ public class Options extends JDialog implements ActionListener {
 			// Check options that might require a game reset
 			boolean requireRestart = false;
 			requireRestart = requireRestart || !difficultySelect.getSelectedItem().equals(difficulty.name());
+			requireRestart = requireRestart || multipleLives != multipleLivesCheck.isSelected();
 			
 			Update check = Update.performCheck(this, requireRestart);
 			if (check.validate) {
 				// Update options that require a reset
 				difficulty = Difficulty.valueOf((String)difficultySelect.getSelectedItem());
-				System.out.println(difficulty);
+				multipleLives = multipleLivesCheck.isSelected();
 			}
 			if (check.restart) {
 				new Game();

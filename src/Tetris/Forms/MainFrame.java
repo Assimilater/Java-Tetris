@@ -68,7 +68,7 @@ public class MainFrame extends JFrame implements ActionListener, KeyListener, Wi
 		JMenu
 		helpMenu = new JMenu("Help");
 		helpMenu.setFont(Program.displayFont);
-		//helpMenu.add(HowtoMenuItem);
+		helpMenu.add(HowtoMenuItem);
 		helpMenu.add(AboutMenuItem);
 		
 		JMenuBar
@@ -122,7 +122,19 @@ public class MainFrame extends JFrame implements ActionListener, KeyListener, Wi
 		}
 		else if (e.getSource() == HowtoMenuItem) {
 			Game.pauseGame();
-			new Instructions();
+			JOptionPane.showMessageDialog(this,
+				"Keyboard Controls:\n\n" +
+					"Left               Move Tetris Block Left\n" +
+					"Right             Move Tetris Block Right\n" +
+					"Up                  Rotate Tetris Block (Clockwise)\n" +
+					"Down            Slide Tetris Block Down\n" +
+					"Space           Hard Drop Tetris Block\n" +
+					"Shift              Swap Falling Tetris Block with Hold Item (Can't be used twice in a row)\n" +
+					"Esc, P           Pause/Resume Game\n" +
+					"Ctrl+N, F2     New Game",
+				"How to Play",
+				JOptionPane.INFORMATION_MESSAGE
+			);
 		}
 		else if (e.getSource() == AboutMenuItem) {
 			Game.pauseGame();

@@ -84,3 +84,5 @@ as resources in a jar.
 
 Also my code's on GitHub. How cool is that? Instead of unzipping this you could have
 cloned it from GitHub with IntelliJ! https://github.com/Assimilater/Java-Tetris/
+
+Oh and, did I mention I compiled it into a jar? You can give it to your friends!
